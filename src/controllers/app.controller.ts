@@ -1,5 +1,12 @@
-import { Controller, Get, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Inject,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { OdbcService } from '../config/database/obdc/odbc.service';
+import { NumberUtils } from 'src/utils/number.utils';
+import { DateUtils } from 'src/utils/date.utils';
 
 @Controller()
 export class AppController {
@@ -8,45 +15,29 @@ export class AppController {
     private readonly odbcService: OdbcService,
   ) {}
 
-  @Get('sensatta')
-  async testSensatta() {
-    const response = await this.odbcService.query(`
-SELECT 
-    LE.DATA_PRODUCAO,
-    LE.DATA_ABATE,
-    LE.DATA_IMPRESSA,
-    LE.DATA_VALIDADE,
-    TM.DESCRICAO AS TIPO_MOVIMENTACAO,
-    EMP.CODIGO_EMPRESA,
-    L.CODIGO_LINHA,
-    P.CODIGO_PRODUTO,
-    LE.CODIGO_ALMOXARIFADO,
-    COUNT(*) AS CAIXAS,
-    SUM(LE.QUANTIDADE) AS QUANTIDADE,
-    SUM(LE.PESO) AS PESO
-    
-FROM sigma_pcp.lote_entrada LE
-JOIN SIGMA_MAT.ALMOXARIFADO AM ON LE.CODIGO_ALMOXARIFADO = AM.CODIGO_ALMOXARIFADO
-JOIN SIGMA_MAT.TIPO_MOVIMENTACAO TM ON LE.TIPO_MOVIMENTO = TM.CODIGO_TIPO_MOVIMENTACAO
-JOIN sigma_fis.empresa EMP ON AM.CODIGO_EMPRESA = EMP.codigo_empresa
-JOIN SIGMA_VEN.PRODUTO P ON LE.SEQUENCIAL_PRODUTO = P.SEQUENCIAL_PRODUTO
-JOIN SIGMA_VEN.LINHA L ON P.SEQUENCIAL_LINHA = L.SEQUENCIAL_LINHA
-      
+  @Get('health')
+  async health() {
+    // Process testing
+    const uptimeInSeconds = NumberUtils.nb2(process.uptime());
+    const now = new Date();
 
-WHERE LE.EXPEDIDO = 0
-  AND LE.CANCELADO = 0 
-GROUP BY 
-    LE.DATA_PRODUCAO,
-    LE.DATA_ABATE,
-    LE.DATA_IMPRESSA,
-    LE.DATA_VALIDADE,
-    TM.DESCRICAO,
-    EMP.CODIGO_EMPRESA,
-    L.CODIGO_LINHA,
-    P.CODIGO_PRODUTO,
-    LE.CODIGO_ALMOXARIFADO;
-      `);
+    // sensatta health
+    const sensattaData = await this.odbcService.query<{ CNT: number }>(
+      `SELECT COUNT(*) AS CNT FROM SIGMA_FIS.EMPRESA`,
+    );
+    const isSensattaHealthy = sensattaData
+      ? !isNaN(sensattaData[0]?.CNT) // Se for um numero, esta saudavel
+      : false;
 
-    return response;
+    if (!isSensattaHealthy || uptimeInSeconds === 0) {
+      throw new ServiceUnavailableException('API indisponivel');
+    }
+
+    return {
+      message: 'RAMAX WS SERVER API - Health verification',
+      moment: now,
+      uptime: `${DateUtils.secondsToHours(uptimeInSeconds)}`,
+      isSensattaHealthy,
+    };
   }
 }
