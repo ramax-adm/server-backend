@@ -3,12 +3,7 @@ import {
   Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { Warehouse } from 'src/entities/typeorm/warehouse.entity';
 import { DataSource } from 'typeorm';
-import {
-  WarehouseSyncRequestDto,
-  WarehouseSyncRequestInput,
-} from './dtos/warehouse-sync.dto';
 import { OdbcService } from 'src/config/database/obdc/odbc.service';
 import {
   CompanySyncRequestDto,
@@ -83,6 +78,18 @@ export class CompanySyncService {
           priceTableNumberTruck: previousCompany?.priceTableNumberTruck,
           isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
         };
+      });
+
+      // PROVISORIO
+      updatedData.push({
+        name: 'FERNANDOPOLIS TESTE',
+        city: 'FERNANDOPOLIS',
+        fantasyName: 'FERNANDOPOLIS TESTE',
+        isConsideredOnStock: true,
+        priceTableNumberCar: '300',
+        priceTableNumberTruck: '299',
+        sensattaCode: '13',
+        uf: 'SP',
       });
 
       await queryRunner.manager.delete(Company, {});

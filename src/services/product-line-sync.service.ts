@@ -64,10 +64,23 @@ export class ProductLineSyncService {
           .map((pl) => pl.sensattaCode),
       );
 
-      const updatedData = sensattaData.map((item) => ({
-        ...item,
-        isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
-      }));
+      const previousProductLines = new Map(
+        previousData.map((p) => [
+          p.sensattaCode,
+          {
+            market: p.market,
+          },
+        ]),
+      );
+
+      const updatedData = sensattaData.map((item) => {
+        const previousProductLine = previousProductLines.get(item.sensattaCode);
+        return {
+          ...item,
+          market: previousProductLine?.market,
+          isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
+        };
+      });
 
       await queryRunner.manager.delete(ProductLine, {});
       await queryRunner.manager.insert(ProductLine, updatedData);

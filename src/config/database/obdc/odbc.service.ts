@@ -23,6 +23,7 @@ export class OdbcService {
 
   async query<T>(rawQuery: string): Promise<T[] | undefined> {
     await this.connect();
+
     try {
       const result = await this.currentConnection.query(rawQuery);
 
@@ -32,7 +33,7 @@ export class OdbcService {
 
       return response as T[];
     } catch (error) {
-      console.error({ error });
+      console.error({ error, odbcCause: error?.odbcErrors, rawQuery });
     } finally {
       await this.closeConnection();
     }

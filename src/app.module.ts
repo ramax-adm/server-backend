@@ -10,6 +10,8 @@ import { ReferencePriceSyncService } from './services/reference-price-sync.servi
 import { ProductSyncService } from './services/product-sync.service';
 import { CompanySyncService } from './services/company-sync.service';
 import { ProductLineSyncService } from './services/product-line-sync.service';
+import { ExternalSyncController } from './controllers/external-sync-controller';
+import { ExternalIncomingBatchSyncService } from './services/external-incoming-batches-sync.service';
 
 @Module({
   imports: [ScheduleModule.forRoot(), DatabaseModule, OdbcModule],
@@ -20,7 +22,10 @@ import { ProductLineSyncService } from './services/product-line-sync.service';
     ProductLineSyncService,
     ReferencePriceSyncService,
     WarehouseSyncService,
+
+    // external
+    ExternalIncomingBatchSyncService,
   ],
-  controllers: [AppController, SensattaSyncController],
+  controllers: [AppController, ExternalSyncController, SensattaSyncController],
 })
 export class AppModule {}

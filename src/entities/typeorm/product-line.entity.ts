@@ -1,3 +1,4 @@
+import { MarketEnum } from 'src/common/enums/market.enum';
 import {
   Column,
   CreateDateColumn,
@@ -24,6 +25,14 @@ export class ProductLine {
 
   @Column({ name: 'is_considered_on_stock', type: 'boolean', default: 'false' })
   isConsideredOnStock: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: MarketEnum,
+    enumName: 'market_enum',
+    default: MarketEnum.MI,
+  })
+  market: MarketEnum;
 
   @CreateDateColumn({
     name: 'created_at',
