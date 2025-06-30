@@ -33,6 +33,8 @@ export class OdbcService {
 
       return response as T[];
     } catch (error) {
+      console.log(error?.odbcErrors[0]);
+
       console.error({ error, odbcCause: error?.odbcErrors, rawQuery });
     } finally {
       await this.closeConnection();

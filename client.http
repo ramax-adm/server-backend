@@ -6,9 +6,25 @@ POST http://localhost:3000/sensatta/sync/warehouse HTTP/1.1
 content-type: application/json 
 ### 
 
+POST http://localhost:3000/sensatta/sync/sync-with-storage HTTP/1.1
+content-type: application/json 
+### 
+
 GET http://localhost:3000/health HTTP/1.1
 content-type: application/json
 ### 
 
 POST http://localhost:3000/sensatta/sync HTTP/1.1
+content-type: application/json 
+###
+
+POST http://localhost:3000/sensatta/sync/stock HTTP/1.1
+content-type: application/json 
+###
+
+POST http://localhost:3000/sensatta/sync/freights HTTP/1.1
+content-type: application/json 
+###
+
+POST http://localhost:3000/sensatta/sync/purchase HTTP/1.1
 content-type: application/json 

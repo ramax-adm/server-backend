@@ -5,6 +5,7 @@ import { GetProductsWithLinesQueryResponse } from 'src/types/external-incoming-b
 import { ExternalIncomingBatch } from 'src/entities/typeorm/external-incoming-batch.entity';
 import { GET_PRODUCTS_WITH_LINE_QUERY } from 'src/common/constants/external-incoming-batch';
 import { ExternalIncomingBatchSyncRequestInput } from './dtos/external-incoming-batches-sync.dto';
+import { ArrayUtils } from 'src/utils/array.utils';
 
 @Injectable()
 export class ExternalIncomingBatchSyncService {
@@ -86,17 +87,25 @@ export class ExternalIncomingBatchSyncService {
           ...item,
           integrationSystem: dto.integrationSystem,
           companyCode: dto.companyCode,
+
           productCode: relatedProduct?.productcode ?? 'N/D',
           productLineCode: relatedProduct?.productlinecode ?? 'N/D',
         };
       });
 
       await queryRunner.manager.delete(ExternalIncomingBatch, {});
-      await queryRunner.manager.insert(ExternalIncomingBatch, updatedData);
+
+      const batchSize = 2000; // ajuste conforme necessário
+      const chunks = ArrayUtils.chunkArray(updatedData, batchSize);
+
+      for (const chunk of chunks) {
+        await queryRunner.manager.save(ExternalIncomingBatch, chunk);
+      }
       await queryRunner.commitTransaction();
     } catch (error) {
       console.error({ error });
       await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
       await queryRunner.release();
     }

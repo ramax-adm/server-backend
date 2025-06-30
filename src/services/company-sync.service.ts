@@ -10,6 +10,16 @@ import {
   CompanySyncRequestInput,
 } from './dtos/company-sync.dto';
 import { Company } from 'src/entities/typeorm/company.entity';
+import { stringify } from 'csv-stringify/.';
+import { createWriteStream } from 'node:fs';
+import { format } from 'fast-csv';
+import { join } from 'node:path';
+import { FileUtils } from 'src/utils/file.utils';
+import { S3StorageService } from 'src/aws';
+import { EnvService } from 'src/config/env/env.service';
+import { DateUtils } from 'src/utils/date.utils';
+import { UtilsStorageSyncedFile } from 'src/entities/typeorm/utils-storage-synced-file.entity';
+import { EntitiesEnum, StorageTypesEnum } from 'src/common/constants/utils';
 
 @Injectable()
 export class CompanySyncService {
@@ -23,9 +33,12 @@ export class CompanySyncService {
     from sigma_fis.empresa emp `;
 
   constructor(
+    @Inject('STORAGE_SERVICE')
+    private readonly storageService: S3StorageService,
     @Inject('ODBC SERVICE')
     private readonly odbcService: OdbcService,
     private readonly dataSource: DataSource,
+    private readonly envService: EnvService,
   ) {}
 
   async getData() {
@@ -82,13 +95,13 @@ export class CompanySyncService {
 
       // PROVISORIO
       updatedData.push({
-        name: 'FERNANDOPOLIS TESTE',
+        name: 'FERNANDOPOLIS - SP (DATAVALE)',
         city: 'FERNANDOPOLIS',
-        fantasyName: 'FERNANDOPOLIS TESTE',
+        fantasyName: 'FERNANDOPOLIS - SP (DATAVALE)',
         isConsideredOnStock: true,
         priceTableNumberCar: '300',
         priceTableNumberTruck: '299',
-        sensattaCode: '13',
+        sensattaCode: '913',
         uf: 'SP',
       });
 
@@ -101,5 +114,25 @@ export class CompanySyncService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async syncWithStorage() {
+    const data = await this.dataSource.manager.find(Company);
+    const buffer = await FileUtils.toCsv(data);
+    const s3Path = `sync-sensatta-snapshots/company-${DateUtils.getFileDate()}.csv`;
+
+    await this.storageService.upload({
+      Bucket: this.envService.get('AWS_S3_BUCKET'),
+      Key: s3Path,
+      Body: buffer,
+    });
+
+    await this.dataSource.manager.save(UtilsStorageSyncedFile, {
+      storageType: StorageTypesEnum.S3,
+      entity: EntitiesEnum.COMPANY,
+      fileUrl: s3Path,
+    });
+
+    return;
   }
 }

@@ -12,20 +12,42 @@ import { CompanySyncService } from './services/company-sync.service';
 import { ProductLineSyncService } from './services/product-line-sync.service';
 import { ExternalSyncController } from './controllers/external-sync-controller';
 import { ExternalIncomingBatchSyncService } from './services/external-incoming-batches-sync.service';
+import { CattlePurchaseFreightsSyncService } from './services/cattle-purchase-freights-sync.service';
+import { ExternalHumanResourceHoursSyncService } from './services/external-human-resources-hours-sync.service';
+import { S3StorageModule } from './aws/s3-storage/s3-storage.module';
+import { AwsController } from './controllers/aws.controller';
+import { EnvModule } from './config/env/env.module';
+import { CattlePurchaseSyncService } from './services/cattle-purchase-sync.service';
+import { StockBalanceSyncService } from './services/stock-balance-sync.service';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), DatabaseModule, OdbcModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    S3StorageModule,
+    EnvModule,
+    DatabaseModule,
+    OdbcModule,
+  ],
   providers: [
+    CattlePurchaseSyncService,
+    CattlePurchaseFreightsSyncService,
     CompanySyncService,
     IncomingBatchSyncService,
     ProductSyncService,
     ProductLineSyncService,
     ReferencePriceSyncService,
+    StockBalanceSyncService,
     WarehouseSyncService,
 
     // external
     ExternalIncomingBatchSyncService,
+    ExternalHumanResourceHoursSyncService,
   ],
-  controllers: [AppController, ExternalSyncController, SensattaSyncController],
+  controllers: [
+    AppController,
+    AwsController,
+    ExternalSyncController,
+    SensattaSyncController,
+  ],
 })
 export class AppModule {}

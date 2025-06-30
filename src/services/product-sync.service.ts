@@ -52,6 +52,15 @@ FROM sigma_ven.produto; `;
         );
       }
 
+      sensattaData.push({
+        classificationType: 'N/D',
+        name: 'Sem DE/PARA',
+        productLineId: 'N/D',
+        sensattaCode: 'N/D',
+        sensattaId: 'N/D',
+        unitCode: 'KG',
+      });
+
       await queryRunner.manager.delete(Product, {});
       await queryRunner.manager.insert(Product, sensattaData);
       await queryRunner.commitTransaction();

@@ -10,6 +10,12 @@ import {
   IncomingBatchesSyncRequestInput,
 } from './dtos/incoming-batch-sync.dto';
 import { IncomingBatches } from 'src/entities/typeorm/incoming-batch.entity';
+import { FileUtils } from 'src/utils/file.utils';
+import { DateUtils } from 'src/utils/date.utils';
+import { S3StorageService } from 'src/aws';
+import { UtilsStorageSyncedFile } from 'src/entities/typeorm/utils-storage-synced-file.entity';
+import { EntitiesEnum, StorageTypesEnum } from 'src/common/constants/utils';
+import { EnvService } from 'src/config/env/env.service';
 
 @Injectable()
 export class IncomingBatchSyncService {
@@ -51,9 +57,12 @@ GROUP BY
     LE.CODIGO_ALMOXARIFADO; `;
 
   constructor(
+    @Inject('STORAGE_SERVICE')
+    private readonly storageService: S3StorageService,
     @Inject('ODBC SERVICE')
     private readonly odbcService: OdbcService,
     private readonly dataSource: DataSource,
+    private readonly envService: EnvService,
   ) {}
 
   async getData() {
@@ -87,5 +96,25 @@ GROUP BY
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async syncWithStorage() {
+    const data = await this.dataSource.manager.find(IncomingBatches);
+    const buffer = await FileUtils.toCsv(data);
+    const s3Path = `sync-sensatta-snapshots/incoming-batches-${DateUtils.getFileDate()}.csv`;
+
+    await this.storageService.upload({
+      Bucket: this.envService.get('AWS_S3_BUCKET'),
+      Key: s3Path,
+      Body: buffer,
+    });
+
+    await this.dataSource.manager.save(UtilsStorageSyncedFile, {
+      storageType: StorageTypesEnum.S3,
+      entity: EntitiesEnum.INCOMING_BATCHES,
+      fileUrl: s3Path,
+    });
+
+    return;
   }
 }

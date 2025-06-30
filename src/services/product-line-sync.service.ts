@@ -15,6 +15,7 @@ import {
   ProductLineSyncRequestInput,
 } from './dtos/product-line-sync.dto';
 import { ProductLine } from 'src/entities/typeorm/product-line.entity';
+import { MarketEnum } from 'src/common/enums/market.enum';
 
 @Injectable()
 export class ProductLineSyncService {
@@ -80,6 +81,16 @@ export class ProductLineSyncService {
           market: previousProductLine?.market,
           isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
         };
+      });
+
+      // Provisorio
+      updatedData.push({
+        sensattaId: 'N/D',
+        sensattaCode: 'N/D',
+        acronym: 'N/D',
+        name: 'Sem DE/PARA',
+        isConsideredOnStock: true,
+        market: MarketEnum.BOTH,
       });
 
       await queryRunner.manager.delete(ProductLine, {});
