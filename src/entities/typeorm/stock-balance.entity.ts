@@ -31,7 +31,7 @@ export class StockBalance {
   @Column({ name: 'weight_in_kg', type: 'float4' })
   weightInKg: number;
 
-  @Column({ name: 'quantity', type: 'float4' })
+  @Column({ name: 'quantity', type: 'int4' })
   quantity: number;
 
   @Column({ name: 'reserved_weight_in_kg', type: 'float4' })

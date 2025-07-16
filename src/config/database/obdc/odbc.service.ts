@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OdbcConfigInterface } from './interface/odbc.config.interface';
 import * as odbc from 'odbc';
+import { StringUtils } from 'src/utils/string.utils';
 
 @Injectable()
 export class OdbcService {
@@ -30,7 +31,6 @@ export class OdbcService {
       const response = Object.entries(result)
         .filter(([key]) => !isNaN(Number(key)))
         .map(([, value]) => value);
-
       return response as T[];
     } catch (error) {
       console.log(error?.odbcErrors[0]);

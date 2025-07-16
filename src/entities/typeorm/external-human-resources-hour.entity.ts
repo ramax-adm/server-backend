@@ -6,7 +6,7 @@ import {
 } from 'typeorm';
 
 @Entity({ name: 'external_human_resources_hours' })
-export class ExternalHumanResourcesHours {
+export class ExternalHumanResourcesHour {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

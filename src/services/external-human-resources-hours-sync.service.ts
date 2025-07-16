@@ -1,12 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Between, DataSource, Not } from 'typeorm';
 import * as ExcelJS from 'exceljs';
-import { GetProductsWithLinesQueryResponse } from 'src/types/external-incoming-batches.types';
-import { ExternalIncomingBatch } from 'src/entities/typeorm/external-incoming-batch.entity';
-import { GET_PRODUCTS_WITH_LINE_QUERY } from 'src/common/constants/external-incoming-batch';
-import { ExternalIncomingBatchSyncRequestInput } from './dtos/external-incoming-batches-sync.dto';
 import { ArrayUtils } from 'src/utils/array.utils';
-import { ExternalHumanResourcesHours } from 'src/entities/typeorm/external-human-resources-hours.entity';
+import { ExternalHumanResourcesHour } from 'src/entities/typeorm/external-human-resources-hour.entity';
 import { ExcelUtils } from 'src/utils/excel.utils';
 import { ExternalHumanResourcesHoursSyncRequestInput } from './dtos/external-human-resources-hours-sync.dto';
 
@@ -16,14 +12,14 @@ export class ExternalHumanResourceHoursSyncService {
 
   async getData(
     file: Express.Multer.File,
-  ): Promise<Partial<ExternalHumanResourcesHours>[]> {
+  ): Promise<Partial<ExternalHumanResourcesHour>[]> {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(file.buffer as any);
 
     console.log('load');
 
     const sheet = workbook.worksheets[0]; // Pegando a primeira aba
-    const result: Partial<ExternalHumanResourcesHours>[] = [];
+    const result: Partial<ExternalHumanResourcesHour>[] = [];
 
     sheet.eachRow((row, rowNumber) => {
       console.log('J', row.getCell('J').text);
@@ -32,7 +28,7 @@ export class ExternalHumanResourceHoursSyncService {
     sheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return; // Pular cabeçalho
 
-      const payload: Partial<ExternalHumanResourcesHours> = {
+      const payload: Partial<ExternalHumanResourcesHour> = {
         date: ExcelUtils.parseDate(row.getCell('A').value),
         payrollNumber: '',
         department: row.getCell('B').text.trim(),
@@ -79,7 +75,7 @@ export class ExternalHumanResourceHoursSyncService {
         companyCode: dto.companyCode,
       }));
 
-      await queryRunner.manager.delete(ExternalHumanResourcesHours, {
+      await queryRunner.manager.delete(ExternalHumanResourcesHour, {
         companyCode: dto.companyCode,
         date: Between(startDate, endDate),
       });
@@ -88,7 +84,7 @@ export class ExternalHumanResourceHoursSyncService {
       const chunks = ArrayUtils.chunkArray(updatedData, batchSize);
 
       for (const chunk of chunks) {
-        await queryRunner.manager.save(ExternalHumanResourcesHours, chunk);
+        await queryRunner.manager.save(ExternalHumanResourcesHour, chunk);
       }
 
       await queryRunner.commitTransaction();

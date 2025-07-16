@@ -5,14 +5,14 @@ select lp.codigo_linha
       ,pr.descricao descricao_produto
       ,emp.codigo_empresa
       ,emp.razao_social nome_empresa
-      --,emp.cidade
-      --,emp.uf
+      ,emp.cidade
+      ,emp.uf
       ,est.peso_estoque 
       ,est.quantidade_estoque 
       ,est.peso_reservado_produto 
       ,est.quantidade_reservada_produto 
-      ,est.peso_disponivel 
-      ,est.quantidade_disponivel 
+      ,est.peso_disponivel_producao peso_disponivel 
+      ,est.qtde_disponivel_producao quantidade_disponivel
  from sigma_ven.produto pr
       ,sigma_mat.material m
       ,sigma_fis.empresa emp

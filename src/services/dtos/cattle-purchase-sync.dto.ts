@@ -7,15 +7,18 @@ export interface CattlePurchaseSyncRequestInput {
   RAZAO_SOCIAL_EMPRESA: string;
   CODIGO_ASSESSOR: string;
   NOME_ASSESSOR: string;
-  QUANTIDADE_CABECAS: string;
+  QUANTIDADE_CABECAS: number;
   CLASSIFICACAO_GADO: string;
   //PESO: string;
-  ARROBA_CABECA: string;
-  PRAZO: string;
-  VALOR_FRETE: string;
-  VALOR_COMPRA: string;
-  COMISSAO: string;
-  VALOR_TOTAL: string;
+  TIPO_PESAGEM: string;
+  ARROBA_CABECA: number;
+  PRAZO: number;
+  VALOR_FRETE: number;
+  VALOR_COMPRA: number;
+  COMISSAO: number;
+  VALOR_TOTAL: number;
+  FUNRURAL: number;
+  PESAGEM_BALANCA: number;
 }
 export class CattlePurchaseSyncRequestDto {
   slaughterDate: Date;
@@ -29,10 +32,14 @@ export class CattlePurchaseSyncRequestDto {
   cattleQuantity: number;
   cattleClassification: string;
   //weight: string;
+  weighingType: string;
   cattleWeightInArroba: number;
+  balanceWeightInKg: number;
   paymentTerm: number;
   freightPrice: number;
+  funruralPrice: number;
   purchasePrice: number;
+  purchaseLiquidPrice: number;
   commissionPrice: number;
   totalValue: number;
 
@@ -49,10 +56,14 @@ export class CattlePurchaseSyncRequestDto {
       cattleQuantity: data.QUANTIDADE_CABECAS,
       cattleClassification: data.CLASSIFICACAO_GADO,
       //weight: data.//PESO,
+      weighingType: data.TIPO_PESAGEM,
       cattleWeightInArroba: data.ARROBA_CABECA,
+      balanceWeightInKg: data.PESAGEM_BALANCA,
       paymentTerm: data.PRAZO,
       freightPrice: data.VALOR_FRETE,
+      funruralPrice: data.FUNRURAL,
       purchasePrice: data.VALOR_COMPRA,
+      purchaseLiquidPrice: data.VALOR_COMPRA - data.FUNRURAL,
       commissionPrice: data.COMISSAO,
       totalValue: data.VALOR_TOTAL,
     });

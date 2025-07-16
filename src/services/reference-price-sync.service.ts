@@ -10,6 +10,7 @@ import {
   ReferencePriceSyncRequestDto,
   ReferencePriceSyncRequestInput,
 } from './dtos/reference-price-sync.dto';
+import { ArrayUtils } from 'src/utils/array.utils';
 
 @Injectable()
 export class ReferencePriceSyncService {
@@ -54,7 +55,12 @@ LEFT JOIN SIGMA_VEN.TABELA_PRECO TP ON TP.SEQUENCIAL_TABELA_PRECO = IP.SEQUENCIA
       }
 
       await queryRunner.manager.delete(ReferencePrice, {});
-      await queryRunner.manager.insert(ReferencePrice, sensattaData);
+      const batchSize = 3000; // ajuste conforme necessário
+      const chunks = ArrayUtils.chunkArray(sensattaData, batchSize);
+
+      for (const chunk of chunks) {
+        await queryRunner.manager.save(ReferencePrice, chunk);
+      }
       await queryRunner.commitTransaction();
     } catch (error) {
       console.error({ error });

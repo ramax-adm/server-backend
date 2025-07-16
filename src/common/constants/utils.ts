@@ -4,7 +4,11 @@ export enum StorageTypesEnum {
 
 export enum EntitiesEnum {
   COMPANY = 'company',
+  CLIENT = 'client',
+  PRODUCT = 'product',
   CATTLE_PURCHASE = 'cattle-purchase',
   INCOMING_BATCHES = 'incoming-batches',
   STOCK_BALANCE = 'stock-balance',
+  PRODUCTION_MOVEMENT = 'production-movement',
+  PRODUCT_INVOICE = 'product-invoice',
 }

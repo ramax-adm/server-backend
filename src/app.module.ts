@@ -19,6 +19,9 @@ import { AwsController } from './controllers/aws.controller';
 import { EnvModule } from './config/env/env.module';
 import { CattlePurchaseSyncService } from './services/cattle-purchase-sync.service';
 import { StockBalanceSyncService } from './services/stock-balance-sync.service';
+import { ProductionMovementSyncService } from './services/production-movement-sync.service';
+import { ProductInvoiceSyncService } from './services/product-invoice-sync.service';
+import { ClientSyncService } from './services/client-sync.service';
 
 @Module({
   imports: [
@@ -29,12 +32,15 @@ import { StockBalanceSyncService } from './services/stock-balance-sync.service';
     OdbcModule,
   ],
   providers: [
+    ClientSyncService,
     CattlePurchaseSyncService,
     CattlePurchaseFreightsSyncService,
     CompanySyncService,
     IncomingBatchSyncService,
     ProductSyncService,
     ProductLineSyncService,
+    ProductInvoiceSyncService,
+    ProductionMovementSyncService,
     ReferencePriceSyncService,
     StockBalanceSyncService,
     WarehouseSyncService,

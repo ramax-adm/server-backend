@@ -10,10 +10,6 @@ import {
   CompanySyncRequestInput,
 } from './dtos/company-sync.dto';
 import { Company } from 'src/entities/typeorm/company.entity';
-import { stringify } from 'csv-stringify/.';
-import { createWriteStream } from 'node:fs';
-import { format } from 'fast-csv';
-import { join } from 'node:path';
 import { FileUtils } from 'src/utils/file.utils';
 import { S3StorageService } from 'src/aws';
 import { EnvService } from 'src/config/env/env.service';
@@ -29,7 +25,13 @@ export class CompanySyncService {
         emp.codigo_empresa,
         emp.nome_fantasia,
         emp.uf,
-        emp.cidade         
+        emp.cidade,
+        emp.endereco,
+        emp.bairro,
+        emp.cep,
+        emp.fone,
+        emp.E_MAIL,
+        emp.inscricao_estadual
     from sigma_fis.empresa emp `;
 
   constructor(
@@ -98,6 +100,12 @@ export class CompanySyncService {
         name: 'FERNANDOPOLIS - SP (DATAVALE)',
         city: 'FERNANDOPOLIS',
         fantasyName: 'FERNANDOPOLIS - SP (DATAVALE)',
+        address: 'N/D',
+        email: 'N/D',
+        neighbourd: 'N/D',
+        phone: 'N/D',
+        stateSubscription: 'N/D',
+        zipcode: 'N/D',
         isConsideredOnStock: true,
         priceTableNumberCar: '300',
         priceTableNumberTruck: '299',

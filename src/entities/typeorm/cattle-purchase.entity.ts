@@ -10,55 +10,67 @@ export class CattlePurchase {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'slaughter_date', type: 'date' })
+  @Column({ name: 'slaughter_date', type: 'date', nullable: true })
   slaughterDate: Date;
 
-  @Column({ name: 'purchase_cattle_order_id' })
+  @Column({ name: 'purchase_cattle_order_id', nullable: true })
   purchaseCattleOrderId: string;
 
-  @Column({ name: 'cattle_owner_code' })
+  @Column({ name: 'cattle_owner_code', nullable: true })
   cattleOwnerCode: string;
 
-  @Column({ name: 'cattle_owner_name' })
+  @Column({ name: 'cattle_owner_name', nullable: true })
   cattleOwnerName: string;
 
-  @Column({ name: 'company_code' })
+  @Column({ name: 'company_code', nullable: true })
   companyCode: string;
 
-  @Column({ name: 'company_name' })
+  @Column({ name: 'company_name', nullable: true })
   companyName: string;
 
-  @Column({ name: 'cattle_advisor_code' })
+  @Column({ name: 'cattle_advisor_code', nullable: true })
   cattleAdvisorCode: string;
 
-  @Column({ name: 'cattle_advisor_name' })
+  @Column({ name: 'cattle_advisor_name', nullable: true })
   cattleAdvisorName: string;
 
-  @Column({ name: 'cattle_quantity' })
+  @Column({ name: 'cattle_quantity', nullable: true })
   cattleQuantity: number;
 
-  @Column({ name: 'cattle_classification' })
+  @Column({ name: 'cattle_classification', nullable: true })
   cattleClassification: string;
 
-  //@Column({name:''})
+  //@Column({name:'',nullable:true})
   //weight: string;
 
-  @Column({ name: 'cattle_weight_in_arroba', type: 'float4' })
+  @Column({ name: 'weighing_type', type: 'varchar', nullable: true })
+  weighingType: string;
+
+  @Column({ name: 'cattle_weight_in_arroba', type: 'float4', nullable: true })
   cattleWeightInArroba: number;
 
-  @Column({ name: 'payment_term', type: 'int' })
+  @Column({ name: 'balance_weight_in_kg', type: 'float4', nullable: true })
+  balanceWeightInKg: number;
+
+  @Column({ name: 'payment_term', type: 'int', nullable: true })
   paymentTerm: number;
 
-  @Column({ name: 'freight_price', type: 'float4' })
+  @Column({ name: 'freight_price', type: 'float4', nullable: true })
   freightPrice: number;
 
-  @Column({ name: 'purchase_price', type: 'float4' })
+  @Column({ name: 'funrural_price', type: 'float4', nullable: true })
+  funruralPrice: number;
+
+  @Column({ name: 'purchase_price', type: 'float4', nullable: true })
   purchasePrice: number;
 
-  @Column({ name: 'commission_price', type: 'float4' })
+  @Column({ name: 'purchase_liquid_price', type: 'float4', nullable: true })
+  purchaseLiquidPrice: number;
+
+  @Column({ name: 'commission_price', type: 'float4', nullable: true })
   commissionPrice: number;
 
-  @Column({ name: 'total_value', type: 'float4' })
+  @Column({ name: 'total_value', type: 'float4', nullable: true })
   totalValue: number;
 
   @CreateDateColumn({

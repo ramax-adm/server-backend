@@ -1,3 +1,5 @@
+import { StringUtils } from 'src/utils/string.utils';
+
 export interface ProductSyncRequestInput {
   SEQUENCIAL_PRODUTO: string;
   CODIGO_PRODUTO: string;
@@ -18,7 +20,7 @@ export class ProductSyncRequestDto {
     Object.assign(this, {
       sensattaId: data.SEQUENCIAL_PRODUTO,
       sensattaCode: data.CODIGO_PRODUTO,
-      name: data.DESCRICAO,
+      name: StringUtils.normalize(data.DESCRICAO),
       productLineId: data.SEQUENCIAL_LINHA,
       unitCode: data.CODIGO_UNIDADE_MEDIDA,
       classificationType: data.TIPO_CLASSIFICACAO,
