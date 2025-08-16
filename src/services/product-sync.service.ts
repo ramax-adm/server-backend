@@ -17,6 +17,10 @@ import { DateUtils } from 'src/utils/date.utils';
 import { FileUtils } from 'src/utils/file.utils';
 import { S3StorageService } from 'src/aws';
 import { EnvService } from 'src/config/env/env.service';
+import { ProductLine } from 'src/entities/typeorm/product-line.entity';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
+import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
+import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
 
 @Injectable()
 export class ProductSyncService {
@@ -29,19 +33,21 @@ SELECT
         sequencial_linha,
         codigo_unidade_medida,
         TIPO_CLASSIFICACAO 
-FROM sigma_ven.produto; `;
+FROM sigma_ven.produto `;
 
   constructor(
     @Inject('STORAGE_SERVICE')
     private readonly storageService: S3StorageService,
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
+    @Inject(ORACLE_DB_PROVIDER)
+    private readonly oracleService: OracleService,
     private readonly dataSource: DataSource,
     private readonly envService: EnvService,
   ) {}
 
   async getData() {
-    const response = await this.odbcService.query<ProductSyncRequestInput>(
+    const response = await this.oracleService.runQuery<ProductSyncRequestInput>(
       this.query,
     );
 
@@ -84,8 +90,25 @@ FROM sigma_ven.produto; `;
   }
 
   async syncWithStorage() {
-    const data = await this.dataSource.manager.find(Product);
-
+    const [products, productLines] = await Promise.all([
+      this.dataSource.manager.find(Product),
+      this.dataSource.manager.find(ProductLine),
+    ]);
+    const data = products.map((p) => {
+      const relatedProductLine = productLines.find(
+        (pl) => pl.sensattaId === p.productLineId,
+      );
+      return {
+        id: p.id,
+        sensattaId: p.sensattaId,
+        sensattaCode: p.sensattaCode,
+        name: p.name,
+        productLineId: p.productLineId,
+        productLineName: relatedProductLine?.name,
+        unitCode: p.unitCode,
+        classificationType: p.classificationType,
+      };
+    });
     const buffer = await FileUtils.toCsv(data);
     const s3Path = `sync-sensatta-snapshots/${EntitiesEnum.PRODUCT}-${DateUtils.getFileDate()}.csv`;
 

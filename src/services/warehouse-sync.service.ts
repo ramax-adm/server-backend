@@ -10,6 +10,7 @@ import {
   WarehouseSyncRequestInput,
 } from './dtos/warehouse-sync.dto';
 import { OdbcService } from 'src/config/database/obdc/odbc.service';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 
 @Injectable()
 export class WarehouseSyncService {
@@ -22,7 +23,7 @@ export class WarehouseSyncService {
     from SIGMA_MAT.ALMOXARIFADO; `;
 
   constructor(
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
     private readonly dataSource: DataSource,
   ) {}
@@ -58,11 +59,22 @@ export class WarehouseSyncService {
           .map((w) => w.sensattaCode),
       );
 
-      const updatedData = sensattaData.map((item) => ({
-        ...item,
-        isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
-        isActive: consideredStockCodes.has(item.sensattaCode),
-      }));
+      const updatedData = sensattaData.map((item) => {
+        // PROVISORIO
+        const almoxarifadoParagominas = item.sensattaCode == '250';
+
+        return {
+          ...item,
+          companyCode: almoxarifadoParagominas ? '918' : item.companyCode,
+          isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
+          isActive: consideredStockCodes.has(item.sensattaCode),
+        };
+        return {
+          ...item,
+          isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
+          isActive: consideredStockCodes.has(item.sensattaCode),
+        };
+      });
 
       await queryRunner.manager.delete(Warehouse, {});
       await queryRunner.manager.insert(Warehouse, updatedData);

@@ -7,12 +7,19 @@ import {
 import { OdbcService } from '../config/database/obdc/odbc.service';
 import { NumberUtils } from 'src/utils/number.utils';
 import { DateUtils } from 'src/utils/date.utils';
+import * as iconv from 'iconv-lite';
+import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
+import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 
 @Controller()
 export class AppController {
   constructor(
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
+
+    @Inject(ORACLE_DB_PROVIDER)
+    private readonly oracleDbService: OracleService,
   ) {}
 
   @Get('health')
@@ -39,5 +46,12 @@ export class AppController {
       uptime: `${DateUtils.secondsToHours(uptimeInSeconds)}`,
       isSensattaHealthy,
     };
+  }
+
+  @Get('test')
+  async test() {
+    return this.oracleDbService.runQuery(
+      "SELECT 'João' AS a, 'Mãe' AS b, 'Coração' AS c FROM dual",
+    );
   }
 }

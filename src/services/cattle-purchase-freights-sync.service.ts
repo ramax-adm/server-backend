@@ -12,6 +12,7 @@ import {
 } from './dtos/cattle-purchase-freights-sync.dto';
 import { CattlePurchaseFreight } from 'src/entities/typeorm/cattle-purchase-freight.entity';
 import { ArrayUtils } from 'src/utils/array.utils';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 
 @Injectable()
 export class CattlePurchaseFreightsSyncService {
@@ -23,7 +24,7 @@ export class CattlePurchaseFreightsSyncService {
   );
 
   constructor(
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
     private readonly dataSource: DataSource,
   ) {}

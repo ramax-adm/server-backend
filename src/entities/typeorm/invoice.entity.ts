@@ -5,13 +5,16 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity({ name: 'sensatta_product_invoices' })
-export class ProductInvoice {
+@Entity({ name: 'sensatta_invoices' })
+export class Invoice {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'date', nullable: true })
   date?: Date;
+
+  @Column({ name: 'nf_situation', nullable: true })
+  nfSituation?: string;
 
   @Column({ name: 'nf_type', nullable: true })
   nfType?: string;

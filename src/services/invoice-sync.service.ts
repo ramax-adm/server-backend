@@ -13,33 +13,40 @@ import { UtilsStorageSyncedFile } from 'src/entities/typeorm/utils-storage-synce
 import { S3StorageService } from 'src/aws';
 import { EnvService } from 'src/config/env/env.service';
 import { NumberUtils } from 'src/utils/number.utils';
-import { PRODUCT_INVOICE_QUERY } from 'src/common/constants/product-invoice';
-import { ProductInvoice } from 'src/entities/typeorm/product-invoce.entity';
+import { INVOICE_QUERY } from 'src/common/constants/invoice';
+import { Invoice } from 'src/entities/typeorm/invoice.entity';
 import {
-  ProductInvoiceSyncRequestInput,
-  ProductInvoiceSyncRequestDto,
-} from './dtos/product-invoice-sync.dto';
+  InvoiceSyncRequestInput,
+  InvoiceSyncRequestDto,
+} from './dtos/invoice-sync.dto';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
+import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
+import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
 
 @Injectable()
-export class ProductInvoiceSyncService {
+export class InvoiceSyncService {
   // QUERY SENSATTA
-  private startDate = '01/01/2025';
-  private query = PRODUCT_INVOICE_QUERY.replaceAll('$1', `'${this.startDate}'`);
+  private startDate = '01/01/2024';
+  private query = INVOICE_QUERY;
 
   constructor(
     @Inject('STORAGE_SERVICE')
     private readonly storageService: S3StorageService,
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
+    @Inject(ORACLE_DB_PROVIDER)
+    private readonly oracleService: OracleService,
     private readonly dataSource: DataSource,
     private readonly envService: EnvService,
   ) {}
 
   async getData() {
-    const response =
-      await this.odbcService.query<ProductInvoiceSyncRequestInput>(this.query);
+    const response = await this.oracleService.runQuery<InvoiceSyncRequestInput>(
+      this.query,
+      [this.startDate],
+    );
 
-    return response?.map((item) => new ProductInvoiceSyncRequestDto(item));
+    return response?.map((item) => new InvoiceSyncRequestDto(item));
   }
 
   async processData() {
@@ -59,12 +66,12 @@ export class ProductInvoiceSyncService {
         );
       }
 
-      await queryRunner.manager.delete(ProductInvoice, {});
+      await queryRunner.manager.delete(Invoice, {});
       const batchSize = 3000; // ajuste conforme necessário
       const chunks = ArrayUtils.chunkArray(sensattaData, batchSize);
 
       for (const chunk of chunks) {
-        await queryRunner.manager.save(ProductInvoice, chunk);
+        await queryRunner.manager.save(Invoice, chunk);
       }
       await queryRunner.commitTransaction();
     } catch (error) {
@@ -77,7 +84,7 @@ export class ProductInvoiceSyncService {
   }
 
   async syncWithStorage() {
-    const data = await this.dataSource.manager.find(ProductInvoice);
+    const data = await this.dataSource.manager.find(Invoice);
 
     const parsedData = data.map((i) => ({
       ...i,

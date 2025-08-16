@@ -20,6 +20,7 @@ import { UtilsStorageSyncedFile } from 'src/entities/typeorm/utils-storage-synce
 import { S3StorageService } from 'src/aws';
 import { EnvService } from 'src/config/env/env.service';
 import { NumberUtils } from 'src/utils/number.utils';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 
 @Injectable()
 export class StockBalanceSyncService {
@@ -29,7 +30,7 @@ export class StockBalanceSyncService {
   constructor(
     @Inject('STORAGE_SERVICE')
     private readonly storageService: S3StorageService,
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
     private readonly dataSource: DataSource,
     private readonly envService: EnvService,

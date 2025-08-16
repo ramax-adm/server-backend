@@ -19,6 +19,7 @@ import {
 } from './dtos/production-movement-sync.dto';
 import { ProductionMovement } from 'src/entities/typeorm/production-movement.entity';
 import { PRODUCTION_MOVEMENT_QUERY } from 'src/common/constants/production-movement';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 
 @Injectable()
 export class ProductionMovementSyncService {
@@ -28,7 +29,7 @@ export class ProductionMovementSyncService {
   constructor(
     @Inject('STORAGE_SERVICE')
     private readonly storageService: S3StorageService,
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
     private readonly dataSource: DataSource,
     private readonly envService: EnvService,

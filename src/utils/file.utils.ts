@@ -31,7 +31,10 @@ export class FileUtils {
       csvStream.on('error', reject);
     });
 
+    // Cria um buffer BOM UTF-8
+    const bomEncoding = Buffer.from([0xef, 0xbb, 0xbf]);
+
     // Retorna o Buffer completo
-    return Buffer.concat(chunks);
+    return Buffer.concat([bomEncoding, ...chunks]);
   }
 }

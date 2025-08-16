@@ -16,6 +16,9 @@ import {
 } from './dtos/product-line-sync.dto';
 import { ProductLine } from 'src/entities/typeorm/product-line.entity';
 import { MarketEnum } from 'src/common/enums/market.enum';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
+import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
+import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
 
 @Injectable()
 export class ProductLineSyncService {
@@ -26,18 +29,19 @@ export class ProductLineSyncService {
         CODIGO_LINHA,
         DESCRICAO,
         SIGLA
-    from SIGMA_VEN.LINHA;`;
+    from SIGMA_VEN.LINHA`;
 
   constructor(
-    @Inject('ODBC SERVICE')
-    private readonly odbcService: OdbcService,
+    @Inject(ORACLE_DB_PROVIDER)
+    private readonly oracleService: OracleService,
     private readonly dataSource: DataSource,
   ) {}
 
   async getData() {
-    const response = await this.odbcService.query<ProductLineSyncRequestInput>(
-      this.query,
-    );
+    const response =
+      await this.oracleService.runQuery<ProductLineSyncRequestInput>(
+        this.query,
+      );
 
     return response?.map((item) => new ProductLineSyncRequestDto(item));
   }

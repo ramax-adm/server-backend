@@ -20,6 +20,7 @@ import { FileUtils } from 'src/utils/file.utils';
 import { NumberUtils } from 'src/utils/number.utils';
 import { S3StorageService } from 'src/aws';
 import { EnvService } from 'src/config/env/env.service';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 
 @Injectable()
 export class CattlePurchaseSyncService {
@@ -30,7 +31,7 @@ export class CattlePurchaseSyncService {
   constructor(
     @Inject('STORAGE_SERVICE')
     private readonly storageService: S3StorageService,
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
     private readonly dataSource: DataSource,
     private readonly envService: EnvService,
@@ -83,11 +84,11 @@ export class CattlePurchaseSyncService {
 
     const parsedData = data.map((i) => ({
       ...i,
-      cattleWeightInArroba: NumberUtils.nb2(i.cattleWeightInArroba),
-      commissionPrice: NumberUtils.nb2(i.commissionPrice),
-      freightPrice: NumberUtils.nb2(i.freightPrice),
-      purchasePrice: NumberUtils.nb2(i.purchasePrice),
-      totalValue: NumberUtils.nb2(i.totalValue),
+      // cattleWeightInArroba: NumberUtils.nb2(i?.cattleWeightInArroba ?? 0),
+      commissionPrice: NumberUtils.nb2(i?.commissionPrice ?? 0),
+      freightPrice: NumberUtils.nb2(i?.freightPrice ?? 0),
+      purchasePrice: NumberUtils.nb2(i?.purchasePrice ?? 0),
+      totalValue: NumberUtils.nb2(i?.totalValue ?? 0),
     }));
     const buffer = await FileUtils.toCsv(parsedData);
     const s3Path = `sync-sensatta-snapshots/${EntitiesEnum.CATTLE_PURCHASE}-${DateUtils.getFileDate()}.csv`;

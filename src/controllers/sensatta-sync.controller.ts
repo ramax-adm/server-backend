@@ -5,7 +5,7 @@ import { CattlePurchaseSyncService } from 'src/services/cattle-purchase-sync.ser
 import { ClientSyncService } from 'src/services/client-sync.service';
 import { CompanySyncService } from 'src/services/company-sync.service';
 import { IncomingBatchSyncService } from 'src/services/incoming-batch-sync.service';
-import { ProductInvoiceSyncService } from 'src/services/product-invoice-sync.service';
+import { InvoiceSyncService } from 'src/services/invoice-sync.service';
 import { ProductLineSyncService } from 'src/services/product-line-sync.service';
 import { ProductSyncService } from 'src/services/product-sync.service';
 import { ProductionMovementSyncService } from 'src/services/production-movement-sync.service';
@@ -27,7 +27,7 @@ export class SensattaSyncController {
     private readonly stockBalanceSyncService: StockBalanceSyncService,
     private readonly productionMovementSyncService: ProductionMovementSyncService,
     private readonly clientSyncService: ClientSyncService,
-    private readonly productInvoiceSyncService: ProductInvoiceSyncService,
+    private readonly InvoiceSyncService: InvoiceSyncService,
   ) {}
 
   @Post()
@@ -37,6 +37,7 @@ export class SensattaSyncController {
     await this.companySyncService.processData();
     await this.syncInvoice();
     await this.syncStock();
+    await this.syncStockBalance();
     await this.syncFreights();
     await this.syncPurchase();
   }
@@ -49,8 +50,8 @@ export class SensattaSyncController {
     // buscar dados do banco postgres
     // escrever csv
     // upar no s3
-    await this.companySyncService.syncWithStorage();
     await this.syncStockWithStorage();
+    await this.syncStockBalanceWithStorage();
     await this.syncInvoiceWithStorage();
     await this.syncPurchaseWithStorage();
   }
@@ -58,12 +59,18 @@ export class SensattaSyncController {
   @Post('stock')
   @HttpCode(HttpStatus.CREATED)
   async syncStock() {
+    await this.companySyncService.processData();
     await this.productionMovementSyncService.processData();
     await this.incomingBatchSyncService.processData();
     await this.productSyncService.processData();
     await this.productLineSyncService.processData();
     await this.referencePriceSyncService.processData();
     await this.warehouseSyncService.processData();
+    // await this.stockBalanceSyncService.processData();
+  }
+  @Post('stock-balance')
+  @HttpCode(HttpStatus.CREATED)
+  async syncStockBalance() {
     await this.stockBalanceSyncService.processData();
   }
 
@@ -71,7 +78,7 @@ export class SensattaSyncController {
   @HttpCode(HttpStatus.CREATED)
   async syncInvoice() {
     await this.clientSyncService.processData();
-    await this.productInvoiceSyncService.processData();
+    await this.InvoiceSyncService.processData();
   }
 
   @Post('freights')
@@ -90,7 +97,7 @@ export class SensattaSyncController {
   @HttpCode(HttpStatus.CREATED)
   async syncInvoiceWithStorage() {
     await this.clientSyncService.syncWithStorage();
-    await this.productInvoiceSyncService.syncWithStorage();
+    await this.InvoiceSyncService.syncWithStorage();
   }
 
   @Post('sync-with-storage/purchase')
@@ -105,6 +112,11 @@ export class SensattaSyncController {
     await this.productionMovementSyncService.syncWithStorage();
     await this.incomingBatchSyncService.syncWithStorage();
     await this.productSyncService.syncWithStorage();
+  }
+
+  @Post('sync-with-storage/stock-balance')
+  @HttpCode(HttpStatus.CREATED)
+  async syncStockBalanceWithStorage() {
     await this.stockBalanceSyncService.syncWithStorage();
   }
 }

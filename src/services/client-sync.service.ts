@@ -19,6 +19,9 @@ import { FileUtils } from 'src/utils/file.utils';
 import { EntitiesEnum, StorageTypesEnum } from 'src/common/constants/utils';
 import { DateUtils } from 'src/utils/date.utils';
 import { UtilsStorageSyncedFile } from 'src/entities/typeorm/utils-storage-synced-file.entity';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
+import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
+import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
 
 @Injectable()
 export class ClientSyncService {
@@ -28,14 +31,16 @@ export class ClientSyncService {
   constructor(
     @Inject('STORAGE_SERVICE')
     private readonly storageService: S3StorageService,
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
+    @Inject(ORACLE_DB_PROVIDER)
+    private readonly oracleService: OracleService,
     private readonly dataSource: DataSource,
     private readonly envService: EnvService,
   ) {}
 
   async getData() {
-    const response = await this.odbcService.query<ClientSyncRequestInput>(
+    const response = await this.oracleService.runQuery<ClientSyncRequestInput>(
       this.query,
     );
 

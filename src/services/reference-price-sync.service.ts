@@ -11,6 +11,7 @@ import {
   ReferencePriceSyncRequestInput,
 } from './dtos/reference-price-sync.dto';
 import { ArrayUtils } from 'src/utils/array.utils';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 
 @Injectable()
 export class ReferencePriceSyncService {
@@ -28,7 +29,7 @@ FROM SIGMA_VEN.ITEM_PRECO IP
 LEFT JOIN SIGMA_VEN.TABELA_PRECO TP ON TP.SEQUENCIAL_TABELA_PRECO = IP.SEQUENCIAL_TABELA_PRECO;`;
 
   constructor(
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
     private readonly dataSource: DataSource,
   ) {}

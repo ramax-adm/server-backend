@@ -1,5 +1,8 @@
 export interface ClientSyncRequestInput {
   CODIGO_CLIENTE: string;
+  CODIGO_REPRESENTANTE: string;
+  REPRESENTANTE_RAZAO_SOCIAL: string;
+  REPRESENTANTE_NOME_FANTASIA: string;
   RAZAO_SOCIAL: Date;
   NOME_FANTAZIA: string;
   INSCRICAO_ESTADUAL: string;
@@ -15,6 +18,9 @@ export class ClientSyncRequestDto {
   sensattaCode: string;
   name: string;
   fantasyName: string;
+  salesRepresentativeCode: string;
+  salesRepresentativeName: string;
+  salesRepresentativeFantasyName: string;
   stateSubscription: string;
   email: string;
   phone: string;
@@ -29,6 +35,9 @@ export class ClientSyncRequestDto {
       sensattaCode: data.CODIGO_CLIENTE,
       name: data.RAZAO_SOCIAL,
       fantasyName: data.NOME_FANTAZIA,
+      salesRepresentativeCode: data.CODIGO_REPRESENTANTE,
+      salesRepresentativeName: data.REPRESENTANTE_RAZAO_SOCIAL,
+      salesRepresentativeFantasyName: data.REPRESENTANTE_NOME_FANTASIA,
       stateSubscription: data.INSCRICAO_ESTADUAL,
       email: data.E_MAIL,
       phone: data.FONE,

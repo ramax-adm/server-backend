@@ -16,6 +16,7 @@ import { EnvService } from 'src/config/env/env.service';
 import { DateUtils } from 'src/utils/date.utils';
 import { UtilsStorageSyncedFile } from 'src/entities/typeorm/utils-storage-synced-file.entity';
 import { EntitiesEnum, StorageTypesEnum } from 'src/common/constants/utils';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 
 @Injectable()
 export class CompanySyncService {
@@ -37,7 +38,7 @@ export class CompanySyncService {
   constructor(
     @Inject('STORAGE_SERVICE')
     private readonly storageService: S3StorageService,
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
     private readonly dataSource: DataSource,
     private readonly envService: EnvService,
@@ -97,9 +98,9 @@ export class CompanySyncService {
 
       // PROVISORIO
       updatedData.push({
-        name: 'FERNANDOPOLIS - SP (DATAVALE)',
-        city: 'FERNANDOPOLIS',
-        fantasyName: 'FERNANDOPOLIS - SP (DATAVALE)',
+        name: 'PARAGOMINAS - PA',
+        city: 'PARAGOMINAS',
+        fantasyName: 'PARAGOMINAS - PA',
         address: 'N/D',
         email: 'N/D',
         neighbourd: 'N/D',
@@ -109,8 +110,8 @@ export class CompanySyncService {
         isConsideredOnStock: true,
         priceTableNumberCar: '300',
         priceTableNumberTruck: '299',
-        sensattaCode: '913',
-        uf: 'SP',
+        sensattaCode: '918',
+        uf: 'PA',
       });
 
       await queryRunner.manager.delete(Company, {});

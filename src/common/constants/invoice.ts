@@ -1,6 +1,7 @@
-export const PRODUCT_INVOICE_QUERY = `
+export const INVOICE_QUERY = `
 select 'COM LEITOR' tipo_nota,
        nfe.data_emissao,
+   	   decode(nfe.situacao,'A','Autorizada','C','Cancelada','G', 'Denegada', 'D', 'Digitação', 'P', 'Processamento','R', 'Rejeitada', 'T', 'Transmitida', 'V', 'Validada', 'I', 'Incompleta','N/D') AS situacao,
        tc.codigo_tipo_cliente,
        tc.descricao tipo_cliente,
        e.codigo_empresa,
@@ -43,7 +44,7 @@ select 'COM LEITOR' tipo_nota,
    and p.codigo_empresa               = e.codigo_empresa
    and cli.sequencial_tipo_cliente    = tc.sequencial_tipo_cliente(+)
    and ipl.sequencial_produto         = pr.sequencial_produto
-   and nfe.data_emissao               >= $1
+   and nfe.data_emissao               >= TO_DATE(:data_inicio,'DD/MM/YYYY')
    --and ns.codigo_empresa              = 3
    --and nfe.numero_documento           = 20149
 group by  tc.codigo_tipo_cliente,
@@ -65,10 +66,12 @@ group by  tc.codigo_tipo_cliente,
        IP.peso_medio_estoque,
        pr.peso_liquido,
        IP.VALOR_UNITARIO,
-       nfe.data_emissao
+       nfe.data_emissao,
+       nfe.situacao
 union all
 select 'AVULSA' tipo_nota,
        nfe.data_emissao,
+   	   decode(nfe.situacao,'A','Autorizada','C','Cancelada','G', 'Denegada', 'D', 'Digitação', 'P', 'Processamento','R', 'Rejeitada', 'T', 'Transmitida', 'V', 'Validada', 'I', 'Incompleta','N/D') AS situacao,
        tc.codigo_tipo_cliente,
        tc.descricao tipo_cliente,
        e.codigo_empresa,
@@ -101,7 +104,7 @@ select 'AVULSA' tipo_nota,
    and ns.codigo_empresa              = e.codigo_empresa
    and cli.sequencial_tipo_cliente    = tc.sequencial_tipo_cliente(+)
    and infe.codigo_produto            = pr.codigo_produto
-   and nfe.data_emissao               >= $1
+   and nfe.data_emissao               >= TO_DATE(:data_inicio,'DD/MM/YYYY')
    --and ns.codigo_empresa              = 3
    and not exists (select 1 from sigma_ven.item_pedido ip, sigma_ven.item_pedido_lote ipl 
                            where ip.sequencial_item_pedido = ipl.sequencial_item_pedido 
@@ -121,5 +124,7 @@ group by  tc.codigo_tipo_cliente,
        infe.quantidade,
        pr.peso_liquido,
        infe.valor_unitario,
-       nfe.data_emissao
+       nfe.data_emissao,       
+       nfe.situacao
+
 `;

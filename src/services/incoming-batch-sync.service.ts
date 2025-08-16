@@ -16,6 +16,8 @@ import { S3StorageService } from 'src/aws';
 import { UtilsStorageSyncedFile } from 'src/entities/typeorm/utils-storage-synced-file.entity';
 import { EntitiesEnum, StorageTypesEnum } from 'src/common/constants/utils';
 import { EnvService } from 'src/config/env/env.service';
+import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
+import { ArrayUtils } from 'src/utils/array.utils';
 
 @Injectable()
 export class IncomingBatchSyncService {
@@ -59,7 +61,7 @@ GROUP BY
   constructor(
     @Inject('STORAGE_SERVICE')
     private readonly storageService: S3StorageService,
-    @Inject('ODBC SERVICE')
+    @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
     private readonly dataSource: DataSource,
     private readonly envService: EnvService,
@@ -85,9 +87,14 @@ GROUP BY
           'Não foi possível buscar dados no Sensatta',
         );
       }
-
       await queryRunner.manager.delete(IncomingBatches, {});
-      await queryRunner.manager.insert(IncomingBatches, sensattaData);
+
+      const batchSize = 2000; // ajuste conforme necessário
+      const chunks = ArrayUtils.chunkArray(sensattaData, batchSize);
+
+      for (const chunk of chunks) {
+        await queryRunner.manager.save(IncomingBatches, chunk);
+      }
       await queryRunner.commitTransaction();
     } catch (error) {
       console.error({ error });

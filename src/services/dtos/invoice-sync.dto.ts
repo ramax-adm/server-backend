@@ -1,7 +1,8 @@
 import { StringUtils } from 'src/utils/string.utils';
 
-export interface ProductInvoiceSyncRequestInput {
+export interface InvoiceSyncRequestInput {
   TIPO_NOTA: string;
+  SITUACAO: string;
   DATA_EMISSAO: Date;
   CODIGO_TIPO_CLIENTE: string;
   TIPO_CLIENTE: string;
@@ -19,8 +20,9 @@ export interface ProductInvoiceSyncRequestInput {
   VALOR_TOTAL: string;
   VALOR_UNITARIO: string;
 }
-export class ProductInvoiceSyncRequestDto {
+export class InvoiceSyncRequestDto {
   date: Date;
+  nfSituation: string;
   nfType: string;
   clientTypeCode: string;
   clientTypeName: string;
@@ -38,21 +40,22 @@ export class ProductInvoiceSyncRequestDto {
   unitPrice: number;
   totalPrice: number;
 
-  constructor(data: ProductInvoiceSyncRequestInput) {
+  constructor(data: InvoiceSyncRequestInput) {
     Object.assign(this, {
       date: data.DATA_EMISSAO,
+      nfSituation: data.SITUACAO,
       nfType: data.TIPO_NOTA,
       clientTypeCode: data.CODIGO_TIPO_CLIENTE?.toString(),
       clientTypeName: data.TIPO_CLIENTE,
       companyCode: data.CODIGO_EMPRESA?.toString(),
       cfopCode: data.CODIGO_CFOP?.toString(),
-      cfopDescription: StringUtils.normalize(data.DESC_CFOP),
+      cfopDescription: data.DESC_CFOP?.trim(),
       nfNumber: data.NOTA_FISCAL,
       requestId: data.SEQUENCIAL_PEDIDO, // sequencial pedido
       clientCode: data.CODIGO_CLIENTE,
-      clientName: data.RAZAO_SOCIAL,
+      clientName: data.RAZAO_SOCIAL?.trim(),
       productCode: data.CODIGO_PRODUTO,
-      productName: StringUtils.normalize(data.PRODUTO),
+      productName: data.PRODUTO?.trim(),
       boxAmount: data.QTDE_CAIXAS,
       weightInKg: data.PESO_LIQUIDO,
       unitPrice: data.VALOR_UNITARIO,

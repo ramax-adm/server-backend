@@ -9,6 +9,9 @@ export class OdbcService {
   private currentConnection: odbc.Connection;
 
   constructor(private odbcConfig: OdbcConfigInterface) {
+    const charset = this.odbcConfig.charset
+      ? `CHARSET=${this.odbcConfig.charset};`
+      : '';
     this.connectionString = `DSN=${this.odbcConfig.dsn};UID=${this.odbcConfig.user};PWD=${this.odbcConfig.password};`;
   }
 
@@ -31,6 +34,11 @@ export class OdbcService {
       const response = Object.entries(result)
         .filter(([key]) => !isNaN(Number(key)))
         .map(([, value]) => value);
+      // .map((value) =>
+      //   typeof value === 'string'
+      //     ? StringUtils.normalize(StringUtils.fixEncoding(value))
+      //     : value,
+      // );
       return response as T[];
     } catch (error) {
       console.log(error?.odbcErrors[0]);

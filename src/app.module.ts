@@ -20,8 +20,9 @@ import { EnvModule } from './config/env/env.module';
 import { CattlePurchaseSyncService } from './services/cattle-purchase-sync.service';
 import { StockBalanceSyncService } from './services/stock-balance-sync.service';
 import { ProductionMovementSyncService } from './services/production-movement-sync.service';
-import { ProductInvoiceSyncService } from './services/product-invoice-sync.service';
+import { InvoiceSyncService } from './services/invoice-sync.service';
 import { ClientSyncService } from './services/client-sync.service';
+import { OracleDbModule } from './config/database/oracle-db/oracle-db.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ClientSyncService } from './services/client-sync.service';
     EnvModule,
     DatabaseModule,
     OdbcModule,
+    OracleDbModule,
   ],
   providers: [
     ClientSyncService,
@@ -39,7 +41,7 @@ import { ClientSyncService } from './services/client-sync.service';
     IncomingBatchSyncService,
     ProductSyncService,
     ProductLineSyncService,
-    ProductInvoiceSyncService,
+    InvoiceSyncService,
     ProductionMovementSyncService,
     ReferencePriceSyncService,
     StockBalanceSyncService,

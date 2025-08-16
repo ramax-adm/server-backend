@@ -10,5 +10,5 @@ export enum EntitiesEnum {
   INCOMING_BATCHES = 'incoming-batches',
   STOCK_BALANCE = 'stock-balance',
   PRODUCTION_MOVEMENT = 'production-movement',
-  PRODUCT_INVOICE = 'product-invoice',
+  PRODUCT_INVOICE = 'invoice',
 }
