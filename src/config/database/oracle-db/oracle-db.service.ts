@@ -11,12 +11,16 @@ export class OracleService {
     process.env.TNS_ADMIN = config.tnsAdmin;
   }
 
-  async runQuery<T = any>(query: string, params: any[] = []): Promise<T[]> {
-    const connection = await oracledb.getConnection({
+  private async getConnection(): Promise<oracledb.Connection> {
+    return await oracledb.getConnection({
       user: this.config.user,
       password: this.config.password,
       connectString: this.config.connectString,
     });
+  }
+
+  async runQuery<T = any>(query: string, params: any[] = []): Promise<T[]> {
+    const connection = await this.getConnection();
 
     try {
       const result = await connection.execute<T>(query, params, {
@@ -24,6 +28,36 @@ export class OracleService {
       });
 
       return result.rows as T[];
+    } finally {
+      await connection.close();
+    }
+  }
+
+  async *runCursorStream<T = any>(
+    query: string,
+    params: any[] = [],
+    fetchSize = 2000,
+  ): AsyncGenerator<T[], void, unknown> {
+    const connection = await this.getConnection();
+
+    try {
+      const result = await connection.execute(query, params, {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        resultSet: true,
+      });
+
+      if (!result.resultSet) {
+        return;
+      }
+
+      let batch: T[];
+      while (
+        (batch = (await result.resultSet.getRows(fetchSize)) as T[]).length > 0
+      ) {
+        yield batch; // devolve o lote atual
+      }
+
+      await result.resultSet.close();
     } finally {
       await connection.close();
     }

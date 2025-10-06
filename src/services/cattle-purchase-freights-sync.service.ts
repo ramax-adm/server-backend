@@ -13,6 +13,8 @@ import {
 import { CattlePurchaseFreight } from 'src/entities/typeorm/cattle-purchase-freight.entity';
 import { ArrayUtils } from 'src/utils/array.utils';
 import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
+import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
+import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
 
 @Injectable()
 export class CattlePurchaseFreightsSyncService {
@@ -26,12 +28,14 @@ export class CattlePurchaseFreightsSyncService {
   constructor(
     @Inject(ODBC_PROVIDER)
     private readonly odbcService: OdbcService,
+    @Inject(ORACLE_DB_PROVIDER)
+    private readonly oracleService: OracleService,
     private readonly dataSource: DataSource,
   ) {}
 
   async getData() {
     const response =
-      await this.odbcService.query<CattlePurchaseFreightsSyncRequestInput>(
+      await this.oracleService.runQuery<CattlePurchaseFreightsSyncRequestInput>(
         this.query,
       );
 

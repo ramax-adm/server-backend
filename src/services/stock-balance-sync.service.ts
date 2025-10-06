@@ -21,6 +21,8 @@ import { S3StorageService } from 'src/aws';
 import { EnvService } from 'src/config/env/env.service';
 import { NumberUtils } from 'src/utils/number.utils';
 import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
+import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
+import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
 
 @Injectable()
 export class StockBalanceSyncService {
@@ -30,29 +32,23 @@ export class StockBalanceSyncService {
   constructor(
     @Inject('STORAGE_SERVICE')
     private readonly storageService: S3StorageService,
-    @Inject(ODBC_PROVIDER)
-    private readonly odbcService: OdbcService,
+
+    @Inject(ORACLE_DB_PROVIDER)
+    private readonly oracleService: OracleService,
     private readonly dataSource: DataSource,
     private readonly envService: EnvService,
   ) {}
 
-  async getData() {
-    const companies = await this.dataSource.manager.find<Company>(Company, {
-      where: {
-        isConsideredOnStock: true,
-      },
-    });
-
-    const response = await this.odbcService.query<StockBalanceSyncRequestInput>(
-      this.query.replaceAll(
-        '$1',
-        companies.map((i) => i.sensattaCode).join(','),
-      ),
-    );
-
-    console.log('length', response?.length);
-
-    return response?.map((item) => new StockBalanceSyncRequestDto(item));
+  async *getDataStream({ companies }: { companies: Company[] }) {
+    const dataIterator =
+      this.oracleService.runCursorStream<StockBalanceSyncRequestInput>(
+        this.query,
+        [],
+        2000, // cada lote com até 2000 objetos
+      );
+    for await (const batch of dataIterator) {
+      yield batch.map((item) => new StockBalanceSyncRequestDto(item));
+    }
   }
 
   async processData() {
@@ -61,24 +57,19 @@ export class StockBalanceSyncService {
     await queryRunner.startTransaction();
 
     try {
-      const [sensattaData] = await Promise.all([
-        this.getData(),
-        // queryRunner.manager.find(Company),
-      ]);
-
-      if (!sensattaData) {
-        throw new UnprocessableEntityException(
-          'Não foi possível buscar dados no Sensatta',
-        );
-      }
-
+      const companies = await this.dataSource.manager.find<Company>(Company, {
+        where: {
+          isConsideredOnStock: true,
+        },
+      });
+      // limpa a tabela antes
       await queryRunner.manager.delete(StockBalance, {});
-      const batchSize = 3000; // ajuste conforme necessário
-      const chunks = ArrayUtils.chunkArray(sensattaData, batchSize);
 
-      for (const chunk of chunks) {
-        await queryRunner.manager.save(StockBalance, chunk);
+      // processa lote a lote
+      for await (const batch of this.getDataStream({ companies })) {
+        await queryRunner.manager.insert(StockBalance, batch);
       }
+
       await queryRunner.commitTransaction();
     } catch (error) {
       console.error({ error });

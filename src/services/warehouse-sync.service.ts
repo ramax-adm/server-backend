@@ -65,7 +65,7 @@ export class WarehouseSyncService {
 
         return {
           ...item,
-          companyCode: almoxarifadoParagominas ? '918' : item.companyCode,
+          companyCode: almoxarifadoParagominas ? '18' : item.companyCode,
           isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
           isActive: consideredStockCodes.has(item.sensattaCode),
         };

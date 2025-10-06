@@ -10,12 +10,14 @@ import { ExternalHumanResourcesHoursSyncRequestInput } from 'src/services/dtos/e
 import { ExternalIncomingBatchSyncRequestInput } from 'src/services/dtos/external-incoming-batches-sync.dto';
 import { ExternalHumanResourceHoursSyncService } from 'src/services/external-human-resources-hours-sync.service';
 import { ExternalIncomingBatchSyncService } from 'src/services/external-incoming-batches-sync.service';
+import { UserSyncService } from 'src/services/user-sync.service';
 
 @Controller('external/sync')
 export class ExternalSyncController {
   constructor(
     private externalIncomingBatchSyncService: ExternalIncomingBatchSyncService,
     private externalHumanResourceHoursSyncService: ExternalHumanResourceHoursSyncService,
+    private userSyncService: UserSyncService,
   ) {}
 
   @Post('incoming-batches')
@@ -37,5 +39,11 @@ export class ExternalSyncController {
       file,
       dto,
     );
+  }
+
+  @Post('users')
+  @UseInterceptors(FileInterceptor('file'))
+  async syncUsers(@UploadedFile() file: Express.Multer.File) {
+    return await this.userSyncService.processData(file);
   }
 }

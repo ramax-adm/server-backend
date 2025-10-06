@@ -3,17 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { EnvModule } from 'src/config/env/env.module';
 import { EnvService } from 'src/config/env/env.service';
-import { CattlePurchaseFreight } from 'src/entities/typeorm/cattle-purchase-freight.entity';
-import { CattlePurchase } from 'src/entities/typeorm/cattle-purchase.entity';
-import { Company } from 'src/entities/typeorm/company.entity';
-import { ExternalHumanResourcesHour } from 'src/entities/typeorm/external-human-resources-hour.entity';
-import { ExternalIncomingBatch } from 'src/entities/typeorm/external-incoming-batch.entity';
-import { IncomingBatches } from 'src/entities/typeorm/incoming-batch.entity';
-import { ProductLine } from 'src/entities/typeorm/product-line.entity';
-import { Product } from 'src/entities/typeorm/product.entity';
-import { ReferencePrice } from 'src/entities/typeorm/reference-price.entity';
-import { SensattaDatavaleProduct } from 'src/entities/typeorm/utils-sensatta-datavale-product.entity';
-import { Warehouse } from 'src/entities/typeorm/warehouse.entity';
 
 @Module({
   imports: [

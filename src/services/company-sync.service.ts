@@ -74,6 +74,12 @@ export class CompanySyncService {
           .filter((c) => c.isConsideredOnStock)
           .map((c) => c.sensattaCode),
       );
+
+      const consideredFreightCodes = new Set(
+        previousData
+          .filter((c) => c.isConsideredOnFreight)
+          .map((c) => c.sensattaCode),
+      );
       const previousCompanies = new Map(
         previousData.map((p) => [
           p.sensattaCode,
@@ -93,26 +99,28 @@ export class CompanySyncService {
           priceTableNumberCar: previousCompany?.priceTableNumberCar,
           priceTableNumberTruck: previousCompany?.priceTableNumberTruck,
           isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
+          isConsideredOnFreight: consideredFreightCodes.has(item.sensattaCode),
         };
       });
 
       // PROVISORIO
-      updatedData.push({
-        name: 'PARAGOMINAS - PA',
-        city: 'PARAGOMINAS',
-        fantasyName: 'PARAGOMINAS - PA',
-        address: 'N/D',
-        email: 'N/D',
-        neighbourd: 'N/D',
-        phone: 'N/D',
-        stateSubscription: 'N/D',
-        zipcode: 'N/D',
-        isConsideredOnStock: true,
-        priceTableNumberCar: '300',
-        priceTableNumberTruck: '299',
-        sensattaCode: '918',
-        uf: 'PA',
-      });
+      // updatedData.push({
+      //   name: 'PARAGOMINAS - PA',
+      //   city: 'PARAGOMINAS',
+      //   fantasyName: 'PARAGOMINAS - PA',
+      //   address: 'N/D',
+      //   email: 'N/D',
+      //   neighbourd: 'N/D',
+      //   phone: 'N/D',
+      //   stateSubscription: 'N/D',
+      //   zipcode: 'N/D',
+      //   isConsideredOnStock: true,
+      //   isConsideredOnFreight: true,
+      //   priceTableNumberCar: '300',
+      //   priceTableNumberTruck: '299',
+      //   sensattaCode: '918',
+      //   uf: 'PA',
+      // });
 
       await queryRunner.manager.delete(Company, {});
       await queryRunner.manager.insert(Company, updatedData);

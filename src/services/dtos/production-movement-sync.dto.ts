@@ -30,14 +30,14 @@ export class ProductionMovementSyncRequestDto {
     const purchaseCattleOrderId =
       data.ORDEM_COMPRA.toString() == '0' ? null : data.ORDEM_COMPRA.toString();
     Object.assign(this, {
-      companyCode: data.CODIGO_EMPRESA.toString(),
+      companyCode: data.CODIGO_EMPRESA?.toString(),
       date: data.DATA_MOVIMENTACAO,
-      movementType: data.TIPO_PRODUCAO.toString(),
-      operationType: data.ESPECIE_MOVIMENTO.toString(),
+      movementType: data.TIPO_PRODUCAO?.toString(),
+      operationType: data.ESPECIE_MOVIMENTO?.toString(),
       purchaseCattleOrderId,
-      productCode: data.CODIGO_PRODUTO.toString(),
+      productCode: data.CODIGO_PRODUTO?.toString(),
       productName: StringUtils.normalize(data.DESCRICAO),
-      productQuarter: data.QUARTEIO.toString(),
+      productQuarter: data.QUARTEIO?.toString(),
       weightInKg: data.PESO,
       quantity: data.PECAS,
       boxQuantity: data.QTDE_CAIXAS,

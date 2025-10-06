@@ -23,6 +23,14 @@ import { ProductionMovementSyncService } from './services/production-movement-sy
 import { InvoiceSyncService } from './services/invoice-sync.service';
 import { ClientSyncService } from './services/client-sync.service';
 import { OracleDbModule } from './config/database/oracle-db/oracle-db.module';
+import { UserSyncService } from './services/user-sync.service';
+import { FreightCompanySyncService } from './services/freight-company-sync.service';
+import { OrderLineSyncService } from './services/order-line.service';
+import { TempLivroFiscalSyncService } from './services/temp-livro-fiscal-sync.service';
+import { TempRazaoContabilSyncService } from './services/temp-razao-contabil-sync.service';
+import { TempBalanceteSyncService } from './services/temp-balancete-sync.service';
+import { TempSyncController } from './controllers/temp-sync.controller';
+import { ReturnOccurenceSyncService } from './services/return-occurrence-sync.service';
 
 @Module({
   imports: [
@@ -39,6 +47,7 @@ import { OracleDbModule } from './config/database/oracle-db/oracle-db.module';
     CattlePurchaseFreightsSyncService,
     CompanySyncService,
     IncomingBatchSyncService,
+    FreightCompanySyncService,
     ProductSyncService,
     ProductLineSyncService,
     InvoiceSyncService,
@@ -46,16 +55,25 @@ import { OracleDbModule } from './config/database/oracle-db/oracle-db.module';
     ReferencePriceSyncService,
     StockBalanceSyncService,
     WarehouseSyncService,
+    OrderLineSyncService,
+    ReturnOccurenceSyncService,
 
     // external
     ExternalIncomingBatchSyncService,
     ExternalHumanResourceHoursSyncService,
+    UserSyncService,
+
+    // temp
+    TempBalanceteSyncService,
+    TempLivroFiscalSyncService,
+    TempRazaoContabilSyncService,
   ],
   controllers: [
     AppController,
     AwsController,
     ExternalSyncController,
     SensattaSyncController,
+    TempSyncController,
   ],
 })
 export class AppModule {}

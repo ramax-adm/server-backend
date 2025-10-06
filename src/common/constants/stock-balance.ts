@@ -22,6 +22,6 @@ where m.codigo_material = pr.codigo_material
   and lp.sequencial_linha = pr.sequencial_linha
   and m.tipo_material = 'P'
   --filtro empresas, se nao precisar remover a linha abaixo
-  and emp.codigo_empresa in ($1) 
+  --and emp.codigo_empresa in (:cod_emp) 
  order by lp.codigo_linha, pr.codigo_produto, emp.codigo_empresa
 `;

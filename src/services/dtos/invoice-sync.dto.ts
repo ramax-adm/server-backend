@@ -11,6 +11,7 @@ export interface InvoiceSyncRequestInput {
   DESC_CFOP: string;
   NOTA_FISCAL: string;
   SEQUENCIAL_PEDIDO: string;
+  SEQUENCIAL_NOTA_SAIDA: string;
   CODIGO_CLIENTE: string;
   RAZAO_SOCIAL: string;
   CODIGO_PRODUTO: string;
@@ -24,13 +25,14 @@ export class InvoiceSyncRequestDto {
   date: Date;
   nfSituation: string;
   nfType: string;
+  nfId: string;
   clientTypeCode: string;
   clientTypeName: string;
   companyCode: string;
   cfopCode: string;
   cfopDescription: string;
   nfNumber: string;
-  requestId: string; // sequencial pedido
+  orderId: string; // sequencial pedido
   clientCode: string;
   clientName: string;
   productCode: string;
@@ -45,13 +47,14 @@ export class InvoiceSyncRequestDto {
       date: data.DATA_EMISSAO,
       nfSituation: data.SITUACAO,
       nfType: data.TIPO_NOTA,
+      nfId: data.SEQUENCIAL_NOTA_SAIDA,
       clientTypeCode: data.CODIGO_TIPO_CLIENTE?.toString(),
       clientTypeName: data.TIPO_CLIENTE,
       companyCode: data.CODIGO_EMPRESA?.toString(),
       cfopCode: data.CODIGO_CFOP?.toString(),
       cfopDescription: data.DESC_CFOP?.trim(),
       nfNumber: data.NOTA_FISCAL,
-      requestId: data.SEQUENCIAL_PEDIDO, // sequencial pedido
+      orderId: data.SEQUENCIAL_PEDIDO, // sequencial pedido
       clientCode: data.CODIGO_CLIENTE,
       clientName: data.RAZAO_SOCIAL?.trim(),
       productCode: data.CODIGO_PRODUTO,

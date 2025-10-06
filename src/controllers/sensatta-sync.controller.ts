@@ -4,13 +4,19 @@ import { CattlePurchaseFreightsSyncService } from 'src/services/cattle-purchase-
 import { CattlePurchaseSyncService } from 'src/services/cattle-purchase-sync.service';
 import { ClientSyncService } from 'src/services/client-sync.service';
 import { CompanySyncService } from 'src/services/company-sync.service';
+import { FreightCompanySyncService } from 'src/services/freight-company-sync.service';
 import { IncomingBatchSyncService } from 'src/services/incoming-batch-sync.service';
 import { InvoiceSyncService } from 'src/services/invoice-sync.service';
+import { OrderLineSyncService } from 'src/services/order-line.service';
 import { ProductLineSyncService } from 'src/services/product-line-sync.service';
 import { ProductSyncService } from 'src/services/product-sync.service';
 import { ProductionMovementSyncService } from 'src/services/production-movement-sync.service';
 import { ReferencePriceSyncService } from 'src/services/reference-price-sync.service';
+import { ReturnOccurenceSyncService } from 'src/services/return-occurrence-sync.service';
 import { StockBalanceSyncService } from 'src/services/stock-balance-sync.service';
+import { TempBalanceteSyncService } from 'src/services/temp-balancete-sync.service';
+import { TempLivroFiscalSyncService } from 'src/services/temp-livro-fiscal-sync.service';
+import { TempRazaoContabilSyncService } from 'src/services/temp-razao-contabil-sync.service';
 import { WarehouseSyncService } from 'src/services/warehouse-sync.service';
 
 @Controller('sensatta/sync')
@@ -28,6 +34,9 @@ export class SensattaSyncController {
     private readonly productionMovementSyncService: ProductionMovementSyncService,
     private readonly clientSyncService: ClientSyncService,
     private readonly InvoiceSyncService: InvoiceSyncService,
+    private readonly freightCompanySyncService: FreightCompanySyncService,
+    private readonly OrderLineSyncService: OrderLineSyncService,
+    private readonly returnOccurenceSyncService: ReturnOccurenceSyncService,
   ) {}
 
   @Post()
@@ -50,10 +59,12 @@ export class SensattaSyncController {
     // buscar dados do banco postgres
     // escrever csv
     // upar no s3
+    await this.companySyncService.syncWithStorage();
     await this.syncStockWithStorage();
-    await this.syncStockBalanceWithStorage();
+    await this.syncStockBalance();
     await this.syncInvoiceWithStorage();
     await this.syncPurchaseWithStorage();
+    await this.syncFreightsWithStorage();
   }
 
   @Post('stock')
@@ -66,7 +77,6 @@ export class SensattaSyncController {
     await this.productLineSyncService.processData();
     await this.referencePriceSyncService.processData();
     await this.warehouseSyncService.processData();
-    // await this.stockBalanceSyncService.processData();
   }
   @Post('stock-balance')
   @HttpCode(HttpStatus.CREATED)
@@ -78,13 +88,16 @@ export class SensattaSyncController {
   @HttpCode(HttpStatus.CREATED)
   async syncInvoice() {
     await this.clientSyncService.processData();
+    await this.returnOccurenceSyncService.processData();
     await this.InvoiceSyncService.processData();
+    await this.OrderLineSyncService.processData();
   }
 
   @Post('freights')
   @HttpCode(HttpStatus.CREATED)
   async syncFreights() {
     await this.cattlePurchaseFreightSyncService.processData();
+    await this.freightCompanySyncService.processData();
   }
 
   @Post('purchase')
@@ -93,11 +106,18 @@ export class SensattaSyncController {
     await this.cattlePurchaseSyncService.processData();
   }
 
+  @Post('sync-with-storage/freights')
+  @HttpCode(HttpStatus.CREATED)
+  async syncFreightsWithStorage() {
+    await this.freightCompanySyncService.syncWithStorage();
+  }
+
   @Post('sync-with-storage/invoice')
   @HttpCode(HttpStatus.CREATED)
   async syncInvoiceWithStorage() {
     await this.clientSyncService.syncWithStorage();
     await this.InvoiceSyncService.syncWithStorage();
+    await this.OrderLineSyncService.syncWithStorage();
   }
 
   @Post('sync-with-storage/purchase')

@@ -13,20 +13,31 @@ import { UtilsStorageSyncedFile } from 'src/entities/typeorm/utils-storage-synce
 import { S3StorageService } from 'src/aws';
 import { EnvService } from 'src/config/env/env.service';
 import { NumberUtils } from 'src/utils/number.utils';
+import { INVOICE_QUERY } from 'src/common/constants/invoice';
+import { Invoice } from 'src/entities/typeorm/invoice.entity';
 import {
-  ProductionMovementSyncRequestDto,
-  ProductionMovementSyncRequestInput,
-} from './dtos/production-movement-sync.dto';
-import { ProductionMovement } from 'src/entities/typeorm/production-movement.entity';
-import { PRODUCTION_MOVEMENT_QUERY } from 'src/common/constants/production-movement';
+  InvoiceSyncRequestInput,
+  InvoiceSyncRequestDto,
+} from './dtos/invoice-sync.dto';
 import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
 import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
+import { ORDER_LINES_QUERY } from 'src/common/constants/orders';
+import {
+  OrderLineSyncRequestDto,
+  OrderLineSyncRequestInput,
+} from './dtos/order-line-sync.dto';
+import { OrderLine } from 'src/entities/typeorm/order-line.entity';
+import { TempLivroFiscalSyncRequestDto } from './dtos/temp-livro-fiscal-sync.dto';
+import { TEMP_LIVRO_FISCAL_QUERY } from 'src/common/constants/temp-livro-fiscal';
+import { TempLivroFiscal } from 'src/entities/typeorm/temp-livro-fiscal.entity';
 
 @Injectable()
-export class ProductionMovementSyncService {
+export class TempLivroFiscalSyncService {
   // QUERY SENSATTA
-  private query = PRODUCTION_MOVEMENT_QUERY;
+  private startDate = '2025-01-01';
+  private endDate = new Date().toISOString().split('T')[0];
+  private query = TEMP_LIVRO_FISCAL_QUERY;
 
   constructor(
     @Inject('STORAGE_SERVICE')
@@ -41,13 +52,13 @@ export class ProductionMovementSyncService {
 
   async *getDataStream() {
     const dataIterator =
-      this.oracleService.runCursorStream<ProductionMovementSyncRequestInput>(
+      this.oracleService.runCursorStream<TempLivroFiscalSyncRequestDto>(
         this.query,
-        [],
+        [this.startDate, this.endDate],
         2000, // cada lote com até 2000 objetos
       );
     for await (const batch of dataIterator) {
-      yield batch.map((item) => new ProductionMovementSyncRequestDto(item));
+      yield batch.map((item) => new TempLivroFiscalSyncRequestDto(item));
     }
   }
 
@@ -58,11 +69,11 @@ export class ProductionMovementSyncService {
 
     try {
       // limpa a tabela antes
-      await queryRunner.manager.delete(ProductionMovement, {});
+      await queryRunner.manager.delete(TempLivroFiscal, {});
 
       // processa lote a lote
       for await (const batch of this.getDataStream()) {
-        await queryRunner.manager.insert(ProductionMovement, batch);
+        await queryRunner.manager.insert(TempLivroFiscal, batch);
       }
 
       await queryRunner.commitTransaction();
@@ -73,32 +84,5 @@ export class ProductionMovementSyncService {
     } finally {
       await queryRunner.release();
     }
-  }
-
-  async syncWithStorage() {
-    const data = await this.dataSource.manager.find(ProductionMovement);
-
-    const parsedData = data.map((i) => ({
-      ...i,
-      weightInKg: NumberUtils.nb2(i.weightInKg ?? 0),
-      quantity: NumberUtils.nb0(i.quantity ?? 0),
-      boxQuantity: NumberUtils.nb0(i.boxQuantity ?? 0),
-    }));
-    const buffer = await FileUtils.toCsv(parsedData);
-    const s3Path = `sync-sensatta-snapshots/${EntitiesEnum.PRODUCTION_MOVEMENT}-${DateUtils.getFileDate()}.csv`;
-
-    await this.storageService.upload({
-      Bucket: this.envService.get('AWS_S3_BUCKET'),
-      Key: s3Path,
-      Body: buffer,
-    });
-
-    await this.dataSource.manager.save(UtilsStorageSyncedFile, {
-      storageType: StorageTypesEnum.S3,
-      entity: EntitiesEnum.PRODUCTION_MOVEMENT,
-      fileUrl: s3Path,
-    });
-
-    return;
   }
 }

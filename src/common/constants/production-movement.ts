@@ -54,4 +54,4 @@ group by pr.codigo_produto,
        t.id_familia,
        le.especie_movimento,
        t.codigo_empresa,
-       trunc(le.data_etiqueta);`;
+       trunc(le.data_etiqueta)`;

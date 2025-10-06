@@ -40,13 +40,16 @@ export class InvoiceSyncService {
     private readonly envService: EnvService,
   ) {}
 
-  async getData() {
-    const response = await this.oracleService.runQuery<InvoiceSyncRequestInput>(
-      this.query,
-      [this.startDate],
-    );
-
-    return response?.map((item) => new InvoiceSyncRequestDto(item));
+  async *getDataStream() {
+    const dataIterator =
+      this.oracleService.runCursorStream<InvoiceSyncRequestInput>(
+        this.query,
+        [this.startDate],
+        2000, // cada lote com até 2000 objetos
+      );
+    for await (const batch of dataIterator) {
+      yield batch.map((item) => new InvoiceSyncRequestDto(item));
+    }
   }
 
   async processData() {
@@ -55,29 +58,19 @@ export class InvoiceSyncService {
     await queryRunner.startTransaction();
 
     try {
-      const [sensattaData] = await Promise.all([
-        this.getData(),
-        // queryRunner.manager.find(Company),
-      ]);
-
-      if (!sensattaData) {
-        throw new UnprocessableEntityException(
-          'Não foi possível buscar dados no Sensatta',
-        );
-      }
-
+      // limpa a tabela antes
       await queryRunner.manager.delete(Invoice, {});
-      const batchSize = 3000; // ajuste conforme necessário
-      const chunks = ArrayUtils.chunkArray(sensattaData, batchSize);
 
-      for (const chunk of chunks) {
-        await queryRunner.manager.save(Invoice, chunk);
+      // processa lote a lote
+      for await (const batch of this.getDataStream()) {
+        await queryRunner.manager.insert(Invoice, batch);
       }
+
       await queryRunner.commitTransaction();
     } catch (error) {
       console.error({ error });
       await queryRunner.rollbackTransaction();
-      throw error;
+      throw new UnprocessableEntityException(error);
     } finally {
       await queryRunner.release();
     }
