@@ -22,12 +22,17 @@ import {
 import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
 import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
+import { ACCOUNT_PAYABLE_QUERY } from 'src/common/constants/account-payable';
+import { AccountPayable } from 'src/entities/typeorm/account-payable.entity';
+import {
+  AccountPayableSyncRequestInput,
+  AccountPayableSyncRequestDto,
+} from './dtos/account-payable-sync.dto';
 
 @Injectable()
-export class InvoiceSyncService {
+export class AccountPayableSyncService {
   // QUERY SENSATTA
-  private startDate = '01/01/2024';
-  private query = INVOICE_QUERY;
+  private query = ACCOUNT_PAYABLE_QUERY;
 
   constructor(
     @Inject('STORAGE_SERVICE')
@@ -42,13 +47,13 @@ export class InvoiceSyncService {
 
   async *getDataStream() {
     const dataIterator =
-      this.oracleService.runCursorStream<InvoiceSyncRequestInput>(
+      this.oracleService.runCursorStream<AccountPayableSyncRequestInput>(
         this.query,
-        { data_inicio: this.startDate },
-        2000, // cada lote com até 2000 objetos
+        {},
+        1500, // cada lote com até 2000 objetos
       );
     for await (const batch of dataIterator) {
-      yield batch.map((item) => new InvoiceSyncRequestDto(item));
+      yield batch.map((item) => new AccountPayableSyncRequestDto(item));
     }
   }
 
@@ -59,11 +64,11 @@ export class InvoiceSyncService {
 
     try {
       // limpa a tabela antes
-      await queryRunner.manager.delete(Invoice, {});
+      await queryRunner.manager.delete(AccountPayable, {});
 
       // processa lote a lote
       for await (const batch of this.getDataStream()) {
-        await queryRunner.manager.insert(Invoice, batch);
+        await queryRunner.manager.insert(AccountPayable, batch);
       }
 
       await queryRunner.commitTransaction();
@@ -74,33 +79,5 @@ export class InvoiceSyncService {
     } finally {
       await queryRunner.release();
     }
-  }
-
-  async syncWithStorage() {
-    const data = await this.dataSource.manager.find(Invoice);
-
-    const parsedData = data.map((i) => ({
-      ...i,
-      unitPrice: NumberUtils.nb2(i.unitPrice ?? 0),
-      totalPrice: NumberUtils.nb2(i.totalPrice ?? 0),
-      weightInKg: NumberUtils.nb2(i.weightInKg ?? 0),
-      quantity: NumberUtils.nb0(i.quantity ?? 0),
-    }));
-    const buffer = await FileUtils.toCsv(parsedData);
-    const s3Path = `sync-sensatta-snapshots/${EntitiesEnum.INVOICE}-${DateUtils.getFileDate()}.csv`;
-
-    await this.storageService.upload({
-      Bucket: this.envService.get('AWS_S3_BUCKET'),
-      Key: s3Path,
-      Body: buffer,
-    });
-
-    await this.dataSource.manager.save(UtilsStorageSyncedFile, {
-      storageType: StorageTypesEnum.S3,
-      entity: EntitiesEnum.INVOICE,
-      fileUrl: s3Path,
-    });
-
-    return;
   }
 }

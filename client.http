@@ -6,6 +6,10 @@ POST http://localhost:3000/sensatta/sync/invoice HTTP/1.1
 content-type: application/json 
 ### 
 
+POST http://localhost:3000/sensatta/sync/inventory HTTP/1.1
+content-type: application/json 
+### 
+
 POST http://localhost:3000/sensatta/sync/sync-with-storage HTTP/1.1
 content-type: application/json 
 ### 
@@ -36,7 +40,10 @@ content-type: application/json
 
 POST http://localhost:3000/sensatta/sync/purchase HTTP/1.1
 content-type: application/json 
+###
 
+POST http://localhost:3000/sensatta/sync/finance HTTP/1.1
+content-type: application/json 
 ###
 POST http://localhost:3000/temp/sync HTTP/1.1
 content-type: application/json 

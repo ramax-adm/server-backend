@@ -63,12 +63,6 @@ export class ProductLineSyncService {
         );
       }
 
-      const consideredStockCodes = new Set(
-        previousData
-          .filter((pl) => pl.isConsideredOnStock)
-          .map((pl) => pl.sensattaCode),
-      );
-
       const previousProductLines = new Map(
         previousData.map((p) => [
           p.sensattaCode,
@@ -83,7 +77,7 @@ export class ProductLineSyncService {
         return {
           ...item,
           market: previousProductLine?.market,
-          isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
+          isActive: true,
         };
       });
 
@@ -93,7 +87,7 @@ export class ProductLineSyncService {
         sensattaCode: 'N/D',
         acronym: 'N/D',
         name: 'Sem DE/PARA',
-        isConsideredOnStock: true,
+        isActive: true,
         market: MarketEnum.BOTH,
       });
 

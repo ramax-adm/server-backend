@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -23,8 +24,8 @@ export class ProductLine {
   @Column()
   acronym: string; // sigla
 
-  @Column({ name: 'is_considered_on_stock', type: 'boolean', default: 'false' })
-  isConsideredOnStock: boolean;
+  @Column({ name: 'is_active', type: 'boolean', default: 'false' })
+  isActive: boolean;
 
   @Column({
     type: 'enum',
@@ -33,6 +34,12 @@ export class ProductLine {
     default: MarketEnum.MI,
   })
   market: MarketEnum;
+
+  // @OneToMany(
+  //   () => ParameterSalesDeductionProductLine,
+  //   (item) => item.paramSaleDeduction,
+  // )
+  // paramSaleDeductionProductLines: ParameterSalesDeductionProductLine[];
 
   @CreateDateColumn({
     name: 'created_at',

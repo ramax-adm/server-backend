@@ -50,7 +50,7 @@ export class OrderLineSyncService {
     const dataIterator =
       this.oracleService.runCursorStream<OrderLineSyncRequestInput>(
         this.query,
-        [this.startDate],
+        { data_inicio: this.startDate },
         1000, // cada lote com até 2000 objetos
       );
     for await (const batch of dataIterator) {

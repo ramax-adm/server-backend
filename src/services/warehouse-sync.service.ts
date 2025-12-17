@@ -54,9 +54,7 @@ export class WarehouseSyncService {
       }
 
       const consideredStockCodes = new Set(
-        previousData
-          .filter((w) => w.isConsideredOnStock)
-          .map((w) => w.sensattaCode),
+        previousData.filter((w) => w.isActive).map((w) => w.sensattaCode),
       );
 
       const updatedData = sensattaData.map((item) => {
@@ -66,7 +64,6 @@ export class WarehouseSyncService {
         return {
           ...item,
           companyCode: almoxarifadoParagominas ? '18' : item.companyCode,
-          isConsideredOnStock: consideredStockCodes.has(item.sensattaCode),
           isActive: consideredStockCodes.has(item.sensattaCode),
         };
         return {

@@ -1,4 +1,5 @@
 export const ORDER_LINES_QUERY = `
+
 SELECT 
     p.DATA_FATURAMENTO,
     p.data_emissao,
@@ -31,10 +32,10 @@ SELECT
     t.sequencial_transportadora,
     t.razao_social AS transportadora,
     ip.OBSERVACAO AS DESCRICAO,
-    ge.CODIGO_GRUPO_EMPENHO,
-    ge.DESCRICAO AS grupo_empenho,
-    emp.CODIGO_EMPENHO,
-    emp.descricao AS empenho,
+--    ge.CODIGO_GRUPO_EMPENHO,
+--    ge.DESCRICAO AS grupo_empenho,
+--    emp.CODIGO_EMPENHO,
+--    emp.descricao AS empenho,
     ns.sequencial_nota_saida,
     nf.numero_documento AS nota_fiscal,
     substr(nf.natureza_operacao,1,4) AS codigo_cfop,
@@ -97,10 +98,10 @@ GROUP BY
     t.sequencial_transportadora,
     t.razao_social,
     ip.OBSERVACAO,
-    ge.CODIGO_GRUPO_EMPENHO,
-    ge.DESCRICAO,
-    emp.CODIGO_EMPENHO,
-    emp.descricao,
+ --   ge.CODIGO_GRUPO_EMPENHO,
+ --   ge.DESCRICAO,
+ --   emp.CODIGO_EMPENHO,
+ --   emp.descricao,
     ns.sequencial_nota_saida,
     nf.numero_documento,
     nf.natureza_operacao

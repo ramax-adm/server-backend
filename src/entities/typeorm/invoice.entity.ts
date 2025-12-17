@@ -22,6 +22,9 @@ export class Invoice {
   @Column({ name: 'nf_type', nullable: true })
   nfType?: string;
 
+  @Column({ name: 'nf_document_type', nullable: true })
+  nfDocumentType?: string;
+
   @Column({ name: 'nf_number', nullable: true })
   nfNumber?: string;
 
@@ -43,6 +46,12 @@ export class Invoice {
   @Column({ name: 'order_id', nullable: true })
   orderId?: string; // sequencial pedido
 
+  @Column({ name: 'order_category', nullable: true })
+  orderCategory?: string;
+
+  @Column({ name: 'order_operation', nullable: true })
+  orderOperation?: string;
+
   @Column({ name: 'client_code', nullable: true })
   clientCode?: string;
 
@@ -55,8 +64,8 @@ export class Invoice {
   @Column({ name: 'product_name', nullable: true })
   productName?: string;
 
-  @Column({ name: 'box_amount', type: 'int4', nullable: true })
-  boxAmount?: number;
+  @Column({ name: 'quantity', type: 'float4', nullable: true })
+  quantity?: number;
 
   @Column({ name: 'weight_in_kg', type: 'float4', nullable: true })
   weightInKg?: number;

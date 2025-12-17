@@ -12,18 +12,48 @@ export class OracleService {
   }
 
   private async getConnection(): Promise<oracledb.Connection> {
-    return await oracledb.getConnection({
+    const connection = await oracledb.getConnection({
       user: this.config.user,
       password: this.config.password,
       connectString: this.config.connectString,
     });
+
+    await connection.execute(`ALTER SESSION SET NLS_NUMERIC_CHARACTERS = ',.'`);
+    return connection;
   }
 
-  async runQuery<T = any>(query: string, params: any[] = []): Promise<T[]> {
+  async runExecution(query: string) {
     const connection = await this.getConnection();
+    await connection.execute(query);
+  }
+
+  async runQuery<T = any>(
+    query: string,
+    params: Record<string, any> = {},
+  ): Promise<T[]> {
+    const connection = await this.getConnection();
+    const expandedParams: Record<string, any> = {};
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (Array.isArray(value)) {
+          // Exemplo: :id_inventarios -> :id_inventarios_0, :id_inventarios_1...
+          const placeholders = value.map((_, i) => `:${key}_${i}`).join(', ');
+
+          // substitui todas as ocorrências de :id_inventarios no SQL
+          query = query.replace(new RegExp(`:${key}\\b`, 'g'), placeholders);
+
+          // adiciona binds individuais
+          value.forEach((v, i) => {
+            expandedParams[`${key}_${i}`] = v;
+          });
+        } else {
+          expandedParams[key] = value;
+        }
+      }
+    }
 
     try {
-      const result = await connection.execute<T>(query, params, {
+      const result = await connection.execute<T>(query, expandedParams, {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
       });
 
@@ -35,13 +65,33 @@ export class OracleService {
 
   async *runCursorStream<T = any>(
     query: string,
-    params: any[] = [],
+    params: Record<string, any> = {},
     fetchSize = 2000,
   ): AsyncGenerator<T[], void, unknown> {
     const connection = await this.getConnection();
+    const expandedParams: Record<string, any> = {};
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        if (Array.isArray(value)) {
+          // Exemplo: :id_inventarios -> :id_inventarios_0, :id_inventarios_1...
+          const placeholders = value.map((_, i) => `:${key}_${i}`).join(', ');
 
+          // substitui todas as ocorrências de :id_inventarios no SQL
+          query = query.replace(new RegExp(`:${key}\\b`, 'g'), placeholders);
+
+          // adiciona binds individuais
+          value.forEach((v, i) => {
+            expandedParams[`${key}_${i}`] = v;
+          });
+        } else {
+          expandedParams[key] = value;
+        }
+      }
+    }
+
+    console.log(expandedParams);
     try {
-      const result = await connection.execute(query, params, {
+      const result = await connection.execute(query, expandedParams, {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
         resultSet: true,
       });

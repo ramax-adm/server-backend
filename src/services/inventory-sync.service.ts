@@ -12,22 +12,19 @@ import { EntitiesEnum, StorageTypesEnum } from 'src/common/constants/utils';
 import { UtilsStorageSyncedFile } from 'src/entities/typeorm/utils-storage-synced-file.entity';
 import { S3StorageService } from 'src/aws';
 import { EnvService } from 'src/config/env/env.service';
-import { NumberUtils } from 'src/utils/number.utils';
-import { INVOICE_QUERY } from 'src/common/constants/invoice';
-import { Invoice } from 'src/entities/typeorm/invoice.entity';
-import {
-  InvoiceSyncRequestInput,
-  InvoiceSyncRequestDto,
-} from './dtos/invoice-sync.dto';
 import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
 import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
+import { Inventory } from 'src/entities/typeorm/inventory.entity';
+import {
+  InventorySyncRequestInput,
+  InventorySyncRequestDto,
+} from './dtos/inventory-sync.dto';
+import { INVENTORY_QUERY } from 'src/common/constants/inventory';
 
 @Injectable()
-export class InvoiceSyncService {
-  // QUERY SENSATTA
-  private startDate = '01/01/2024';
-  private query = INVOICE_QUERY;
+export class InventorySyncService {
+  private query = INVENTORY_QUERY;
 
   constructor(
     @Inject('STORAGE_SERVICE')
@@ -42,13 +39,13 @@ export class InvoiceSyncService {
 
   async *getDataStream() {
     const dataIterator =
-      this.oracleService.runCursorStream<InvoiceSyncRequestInput>(
+      this.oracleService.runCursorStream<InventorySyncRequestInput>(
         this.query,
-        { data_inicio: this.startDate },
-        2000, // cada lote com até 2000 objetos
+        {},
+        1000, // cada lote com até 2000 objetos
       );
     for await (const batch of dataIterator) {
-      yield batch.map((item) => new InvoiceSyncRequestDto(item));
+      yield batch.map((item) => new InventorySyncRequestDto(item));
     }
   }
 
@@ -57,13 +54,25 @@ export class InvoiceSyncService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
+    const previousData = await queryRunner.manager.find(Inventory);
+    const previousDataMap = new Map(
+      previousData.map((i) => [String(i.sensattaId), i]),
+    );
+
     try {
       // limpa a tabela antes
-      await queryRunner.manager.delete(Invoice, {});
+      await queryRunner.manager.delete(Inventory, {});
 
       // processa lote a lote
       for await (const batch of this.getDataStream()) {
-        await queryRunner.manager.insert(Invoice, batch);
+        const dataToInsert = batch.map((i) => {
+          const previousInvetory = previousDataMap.get(String(i.sensattaId));
+
+          return { ...i, syncedAt: previousInvetory?.syncedAt };
+        });
+        console.log({ previousDataMap, dataToInsert });
+        // throw new Error('ERRO');
+        await queryRunner.manager.insert(Inventory, dataToInsert);
       }
 
       await queryRunner.commitTransaction();
@@ -77,17 +86,10 @@ export class InvoiceSyncService {
   }
 
   async syncWithStorage() {
-    const data = await this.dataSource.manager.find(Invoice);
+    const data = await this.dataSource.manager.find(Inventory);
 
-    const parsedData = data.map((i) => ({
-      ...i,
-      unitPrice: NumberUtils.nb2(i.unitPrice ?? 0),
-      totalPrice: NumberUtils.nb2(i.totalPrice ?? 0),
-      weightInKg: NumberUtils.nb2(i.weightInKg ?? 0),
-      quantity: NumberUtils.nb0(i.quantity ?? 0),
-    }));
-    const buffer = await FileUtils.toCsv(parsedData);
-    const s3Path = `sync-sensatta-snapshots/${EntitiesEnum.INVOICE}-${DateUtils.getFileDate()}.csv`;
+    const buffer = await FileUtils.toCsv(data);
+    const s3Path = `sync-sensatta-snapshots/${EntitiesEnum.INVENTORY}-${DateUtils.getFileDate()}.csv`;
 
     await this.storageService.upload({
       Bucket: this.envService.get('AWS_S3_BUCKET'),
@@ -97,7 +99,7 @@ export class InvoiceSyncService {
 
     await this.dataSource.manager.save(UtilsStorageSyncedFile, {
       storageType: StorageTypesEnum.S3,
-      entity: EntitiesEnum.INVOICE,
+      entity: EntitiesEnum.INVENTORY,
       fileUrl: s3Path,
     });
 

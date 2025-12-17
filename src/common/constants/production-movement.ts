@@ -30,28 +30,37 @@ group by pr.codigo_produto,
        oc.codigo_empresa,
        le.especie_movimento
 union all       
+/*
+ * Para o dia 01/12/2025 os valores sao
+ * 
+ * caixas 8687
+ * peças 44372
+ * */
 select t.codigo_empresa,
-       trunc(le.data_etiqueta) data_movimentacao,
+       trunc(le.DATA_PRODUCAO) data_movimentacao,
        'SAIDA' TIPO_PRODUCAO,
        le.especie_movimento,
        0000 ordem_compra,
        pr.codigo_produto,
        pr.descricao,
        decode(t.id_familia,4,'TR',5,'DT',6,'PA',10,'MIUDOS')QUARTEIO,
-       Round(sum(le.peso)) qtde_peso,
        sum(le.quantidade)qtde_pecas,
+       Round(sum(le.peso),2) qtde_peso,
        count(le.numero_caixa)qtde_caixas       
   from sigma_pcp.lote_entrada le,
        sigma_pcp.tabela_pcp t,
        sigma_ven.produto pr
  where le.id_tabela_pcp      = t.id_tabela_pcp
    and le.sequencial_produto = pr.sequencial_produto
-   --and t.data_programacao    = '07/07/2025'
+   --and le.DATA_PRODUCAO     = '01/12/2025'
    --and t.codigo_empresa      = 3
    and t.id_familia          not in (1)
+   AND le.CANCELADO = 0
+   AND le.ESPECIE_MOVIMENTO = 'PRD'
+   
 group by pr.codigo_produto,
        pr.descricao,
        t.id_familia,
        le.especie_movimento,
        t.codigo_empresa,
-       trunc(le.data_etiqueta)`;
+       trunc(le.data_producao)`;

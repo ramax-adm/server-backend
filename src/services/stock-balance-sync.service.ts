@@ -43,7 +43,7 @@ export class StockBalanceSyncService {
     const dataIterator =
       this.oracleService.runCursorStream<StockBalanceSyncRequestInput>(
         this.query,
-        [],
+        {},
         2000, // cada lote com até 2000 objetos
       );
     for await (const batch of dataIterator) {

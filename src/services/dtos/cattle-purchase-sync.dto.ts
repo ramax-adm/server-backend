@@ -22,7 +22,7 @@ export interface CattlePurchaseSyncRequestInput {
 }
 export class CattlePurchaseSyncRequestDto {
   slaughterDate: Date;
-  purchaseCattleOrderId: string;
+  sensattaId: string;
   cattleOwnerCode: string;
   cattleOwnerName: string;
   companyCode: string;
@@ -46,7 +46,7 @@ export class CattlePurchaseSyncRequestDto {
   constructor(data: CattlePurchaseSyncRequestInput) {
     Object.assign(this, {
       slaughterDate: data.DATA_ABATE,
-      purchaseCattleOrderId: data.ID_ORDEM_COMPRA_GADO?.toString(),
+      sensattaId: data.ID_ORDEM_COMPRA_GADO?.toString(),
       cattleOwnerCode: data.CODIGO_PECUARISTA?.toString(),
       cattleOwnerName: data.PECUARISTA,
       companyCode: data.CODIGO_EMPRESA?.toString(),

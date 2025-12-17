@@ -1,0 +1,40 @@
+export const SENSATTA_ENTITY_QUERY = `
+SELECT 
+    e.ID_ENTIDADE,
+    e.CODIGO_ENTIDADE,
+    e.NOME,
+    e.CPF_CNPJ,
+    e.FANTASIA,
+    e.E_MAIL,
+    e.FONE,
+    e.CEP,
+    e.BAIRRO,
+    e.ENDERECO,
+    e.CIDADE,
+    e.UF,
+    NVL(
+        LISTAGG(te.DESCRICAO, ', ') 
+        WITHIN GROUP (ORDER BY te.DESCRICAO),
+        ''
+    ) AS RELACIONAMENTOS
+FROM sigma_ven.ENTIDADE e
+LEFT JOIN sigma_ven.RELACIONAMENTO_ENTIDADE re 
+    ON re.ID_ENTIDADE = e.ID_ENTIDADE
+LEFT JOIN sigma_ven.TIPO_ENTIDADE te 
+    ON te.ID_TIPO_ENTIDADE = re.ID_TIPO_ENTIDADE
+GROUP BY 
+    e.ID_ENTIDADE,
+    e.CODIGO_ENTIDADE,
+    e.NOME,
+    e.CPF_CNPJ,
+    e.FANTASIA,
+    e.E_MAIL,
+    e.FONE,
+    e.CEP,
+    e.BAIRRO,
+    e.ENDERECO,
+    e.CIDADE,
+    e.UF
+--HAVING MAX(CASE WHEN UPPER(te.DESCRICAO) = 'CLIENTE' THEN 1 ELSE 0 END) = 1
+ORDER BY e.NOME
+`;

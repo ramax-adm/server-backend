@@ -25,12 +25,19 @@ import { ClientSyncService } from './services/client-sync.service';
 import { OracleDbModule } from './config/database/oracle-db/oracle-db.module';
 import { UserSyncService } from './services/user-sync.service';
 import { FreightCompanySyncService } from './services/freight-company-sync.service';
-import { OrderLineSyncService } from './services/order-line.service';
+import { OrderLineSyncService } from './services/order-line-sync.service';
 import { TempLivroFiscalSyncService } from './services/temp-livro-fiscal-sync.service';
 import { TempRazaoContabilSyncService } from './services/temp-razao-contabil-sync.service';
 import { TempBalanceteSyncService } from './services/temp-balancete-sync.service';
 import { TempSyncController } from './controllers/temp-sync.controller';
 import { ReturnOccurenceSyncService } from './services/return-occurrence-sync.service';
+import { SensattaEntitySyncService } from './services/sensatta-entity-sync.service';
+import { InventorySyncService } from './services/inventory-sync.service';
+import { InventoryItemAndTraceabilitySyncService } from './services/inventory-item-and-traceability-sync.service';
+import { TempTitulosPagarSyncService } from './services/temp-titulos-pagar-sync.service';
+import { AccountReceivableSyncService } from './services/account-receivable-sync.service';
+import { AccountPayableSyncService } from './services/account-payable-sync.service';
+import { TempHistoricoRefaturamentoSyncService } from './services/temp-historico-refaturamento-sync.service';
 
 @Module({
   imports: [
@@ -42,6 +49,8 @@ import { ReturnOccurenceSyncService } from './services/return-occurrence-sync.se
     OracleDbModule,
   ],
   providers: [
+    AccountPayableSyncService,
+    AccountReceivableSyncService,
     ClientSyncService,
     CattlePurchaseSyncService,
     CattlePurchaseFreightsSyncService,
@@ -54,9 +63,12 @@ import { ReturnOccurenceSyncService } from './services/return-occurrence-sync.se
     ProductionMovementSyncService,
     ReferencePriceSyncService,
     StockBalanceSyncService,
+    InventorySyncService,
+    InventoryItemAndTraceabilitySyncService,
     WarehouseSyncService,
     OrderLineSyncService,
     ReturnOccurenceSyncService,
+    SensattaEntitySyncService,
 
     // external
     ExternalIncomingBatchSyncService,
@@ -67,6 +79,8 @@ import { ReturnOccurenceSyncService } from './services/return-occurrence-sync.se
     TempBalanceteSyncService,
     TempLivroFiscalSyncService,
     TempRazaoContabilSyncService,
+    TempTitulosPagarSyncService,
+    TempHistoricoRefaturamentoSyncService,
   ],
   controllers: [
     AppController,

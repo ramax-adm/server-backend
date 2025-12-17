@@ -45,7 +45,7 @@ export class ReturnOccurenceSyncService {
     const dataIterator =
       this.oracleService.runCursorStream<ReturnOccurrenceSyncRequestInput>(
         this.query,
-        [this.startDate],
+        { data1: this.startDate },
         2000, // cada lote com até 2000 objetos
       );
     for await (const batch of dataIterator) {

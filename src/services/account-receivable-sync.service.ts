@@ -22,12 +22,24 @@ import {
 import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
 import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
+import { ACCOUNT_PAYABLE_QUERY } from 'src/common/constants/account-payable';
+import { AccountPayable } from 'src/entities/typeorm/account-payable.entity';
+import {
+  AccountPayableSyncRequestInput,
+  AccountPayableSyncRequestDto,
+} from './dtos/account-payable-sync.dto';
+import { ACCOUNT_RECEIVABLE_QUERY } from 'src/common/constants/account-receivable';
+import {
+  AccountReceivableSyncRequestDto,
+  AccountReceivableSyncRequestInput,
+} from './dtos/account-receivable-sync.dto';
+import { AccountReceivable } from 'src/entities/typeorm/account-receivable.entity';
 
 @Injectable()
-export class InvoiceSyncService {
+export class AccountReceivableSyncService {
   // QUERY SENSATTA
-  private startDate = '01/01/2024';
-  private query = INVOICE_QUERY;
+  private baseDate = new Date().toISOString().split('T')[0];
+  private query = ACCOUNT_RECEIVABLE_QUERY;
 
   constructor(
     @Inject('STORAGE_SERVICE')
@@ -42,13 +54,13 @@ export class InvoiceSyncService {
 
   async *getDataStream() {
     const dataIterator =
-      this.oracleService.runCursorStream<InvoiceSyncRequestInput>(
+      this.oracleService.runCursorStream<AccountReceivableSyncRequestInput>(
         this.query,
-        { data_inicio: this.startDate },
+        { data_base: this.baseDate },
         2000, // cada lote com até 2000 objetos
       );
     for await (const batch of dataIterator) {
-      yield batch.map((item) => new InvoiceSyncRequestDto(item));
+      yield batch.map((item) => new AccountReceivableSyncRequestDto(item));
     }
   }
 
@@ -56,14 +68,19 @@ export class InvoiceSyncService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+    const session = await this.oracleService.runQuery(`
+        SELECT * FROM nls_session_parameters WHERE parameter LIKE 'NLS_NUMERIC%'`);
+    console.log({ session, baseDate: this.baseDate });
+
+    // throw new Error('Erro proposital');
 
     try {
       // limpa a tabela antes
-      await queryRunner.manager.delete(Invoice, {});
+      await queryRunner.manager.delete(AccountReceivable, {});
 
       // processa lote a lote
       for await (const batch of this.getDataStream()) {
-        await queryRunner.manager.insert(Invoice, batch);
+        await queryRunner.manager.insert(AccountReceivable, batch);
       }
 
       await queryRunner.commitTransaction();
@@ -74,33 +91,5 @@ export class InvoiceSyncService {
     } finally {
       await queryRunner.release();
     }
-  }
-
-  async syncWithStorage() {
-    const data = await this.dataSource.manager.find(Invoice);
-
-    const parsedData = data.map((i) => ({
-      ...i,
-      unitPrice: NumberUtils.nb2(i.unitPrice ?? 0),
-      totalPrice: NumberUtils.nb2(i.totalPrice ?? 0),
-      weightInKg: NumberUtils.nb2(i.weightInKg ?? 0),
-      quantity: NumberUtils.nb0(i.quantity ?? 0),
-    }));
-    const buffer = await FileUtils.toCsv(parsedData);
-    const s3Path = `sync-sensatta-snapshots/${EntitiesEnum.INVOICE}-${DateUtils.getFileDate()}.csv`;
-
-    await this.storageService.upload({
-      Bucket: this.envService.get('AWS_S3_BUCKET'),
-      Key: s3Path,
-      Body: buffer,
-    });
-
-    await this.dataSource.manager.save(UtilsStorageSyncedFile, {
-      storageType: StorageTypesEnum.S3,
-      entity: EntitiesEnum.INVOICE,
-      fileUrl: s3Path,
-    });
-
-    return;
   }
 }

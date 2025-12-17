@@ -43,7 +43,7 @@ export class ProductionMovementSyncService {
     const dataIterator =
       this.oracleService.runCursorStream<ProductionMovementSyncRequestInput>(
         this.query,
-        [],
+        {},
         2000, // cada lote com até 2000 objetos
       );
     for await (const batch of dataIterator) {

@@ -41,7 +41,7 @@ export class TempRazaoContabilSyncService {
     const dataIterator =
       this.oracleService.runCursorStream<TempRazaoContabilSyncRequestDto>(
         this.query,
-        [this.startDate, this.endDate],
+        { data1: this.startDate, data2: this.endDate },
         2000, // cada lote com até 2000 objetos
       );
     for await (const batch of dataIterator) {
