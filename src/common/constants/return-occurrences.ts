@@ -14,19 +14,18 @@ SELECT
 ,TRIM(BOTH FROM REPLACE(REPLACE(bod.observacao, CHR(10), ' '), CHR(13), ' ')) AS observacao
 ,p.codigo_produto
 ,TRIM(BOTH FROM REPLACE(REPLACE(P.DESCRICAO, CHR(10), ' '), CHR(13), ' ')) AS DESCRICAO
---,nsip.nota_saida AS nf_faturamento_item_pedido
+
+-- FATURAMENTO INICIAL
 ,bod.sequencial_pedido
 ,bodi.sequencial_item_pedido
---,ip.sequencial_item_pedido
---,ns.SEQUENCIAL_NOTA_SAIDA 
---,nsteste.sequencial_nota_saida
 ,nsip.nota_saida AS nf_faturamento
 ,nfe.id_nota_fiscal
 ,t.quantidade AS quantidade_faturamento
 ,t.peso_liquido AS peso_faturamento_kg
 ,t.valor_unitario AS valor_un_faturamento
 ,t.valor_total AS valor_total_faturamento
---,t.*
+
+-- DEVOLUCAO
 ,ne.sequencial_nota_entrada
 ,ne.nota_entrada AS nf_devolucao
 ,ROUND(bodi.quantidade) AS quantidade_devolvida
@@ -45,6 +44,7 @@ LEFT JOIN sigma_ven.pedido ped ON bod.SEQUENCIAL_PEDIDO = ped.SEQUENCIAL_PEDIDO
 LEFT JOIN sigma_fin.representante r ON ped.CODIGO_REPRESENTANTE = r.CODIGO_REPRESENTANTE 
 LEFT JOIN sigma_ven.MOTIVO_DEVOLUCAO_VENDA mdv ON bod.CODIGO_MOTIVO_DEVOLUCAO_VENDA = mdv.CODIGO_MOTIVO_DEVOLUCAO_VENDA 
 LEFT JOIN sigma_mat.NOTA_ENTRADA ne ON bod.sequencial_nota_entrada = ne.sequencial_nota_entrada
+LEFT JOIN sigma_nfe.NOTA_FISCAL nfe_ent ON nfe_ent.SEQUENCIAL_NOTA = ne.SEQUENCIAL_NOTA_ENTRADA AND nfe_ent.TIPO_DOCUMENTO = 0
 --LEFT JOIN sigma_mat.NOTA_SAIDA ns ON bodi.sequencial_nota_saida = ns.sequencial_nota_saida
 --LEFT JOIN sigma_mat.NOTA_SAIDA nsteste ON ped.sequencial_pedido = ns.sequencial_pedido
 LEFT JOIN sigma_mat.NOTA_SAIDA nsip ON bod.SEQUENCIAL_PEDIDO = nsip.sequencial_pedido
@@ -65,7 +65,7 @@ LEFT JOIN (
 	GROUP BY nf.numero_documento, infe.id_nota_fiscal, p.CODIGO_PRODUTO 
 ) T ON T.id_nota_fiscal = nfe.id_nota_fiscal AND t.codigo_produto = p.codigo_produto
 WHERE 1=1
---AND bod.ID_BOLETIM_OCORRENCIA_DEV = 2298
+--AND bod.ID_BOLETIM_OCORRENCIA_DEV = 3583
 AND bod."DATA" >= to_date(:data1,'YYYY-MM-DD')
 ORDER BY 1 desc
 `;

@@ -5,29 +5,32 @@ import {
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { OdbcService } from 'src/config/database/obdc/odbc.service';
+import { ArrayUtils } from 'src/utils/array.utils';
+import { FileUtils } from 'src/utils/file.utils';
+import { DateUtils } from 'src/utils/date.utils';
+import { EntitiesEnum, StorageTypesEnum } from 'src/common/constants/utils';
+import { UtilsStorageSyncedFile } from 'src/entities/typeorm/utils-storage-synced-file.entity';
 import { S3StorageService } from 'src/aws';
 import { EnvService } from 'src/config/env/env.service';
-
 import { ODBC_PROVIDER } from 'src/config/database/obdc/providers/odbc.provider';
 import { ORACLE_DB_PROVIDER } from 'src/config/database/oracle-db/providers/oracle-db.provider';
 import { OracleService } from 'src/config/database/oracle-db/oracle-db.service';
-
-import { TempLivroFiscalSyncRequestDto } from './dtos/temp-livro-fiscal-sync.dto';
-import { TEMP_LIVRO_FISCAL_QUERY } from 'src/common/constants/temp-livro-fiscal';
-import { TempLivroFiscal } from 'src/entities/typeorm/temp-livro-fiscal.entity';
-import { TempRazaoContabil } from 'src/entities/typeorm/temp-razao-contabil.entity';
-import { TempRazaoContabilSyncRequestDto } from './dtos/temp-razao-contabil-sync.dto';
-import { TEMP_RAZAO_CONTABIL_QUERY } from 'src/common/constants/temp-razao-contabil';
-import { TempTitulosPagar } from 'src/entities/typeorm/temp-titulos-pagar.entity';
-import { TempTitulosPagarSyncRequestDto } from './dtos/temp-titulos-pagar-sync.dto';
-import { TEMP_TITULOS_PAGAR_QUERY } from 'src/common/constants/temp-titulos-pagar';
+import { Inventory } from 'src/entities/typeorm/inventory.entity';
+import {
+  InventorySyncRequestInput,
+  InventorySyncRequestDto,
+} from './dtos/inventory-sync.dto';
+import { INVENTORY_QUERY } from 'src/common/constants/inventory';
+import { INVENTORY_BALANCE_QUERY } from 'src/common/constants/inventory-balance';
+import { InventoryBalance } from 'src/entities/typeorm/inventory-balance.entity';
+import {
+  InventoryBalanceSyncRequestDto,
+  InventoryBalanceSyncRequestInput,
+} from './dtos/inventory-balance-sync.dto';
 
 @Injectable()
-export class TempTitulosPagarSyncService {
-  // QUERY SENSATTA
-  private startDate = '2025-01-01';
-  private endDate = new Date().toISOString().split('T')[0];
-  private query = TEMP_TITULOS_PAGAR_QUERY;
+export class InventoryBalanceSyncService {
+  private query = INVENTORY_BALANCE_QUERY;
 
   constructor(
     @Inject('STORAGE_SERVICE')
@@ -42,13 +45,13 @@ export class TempTitulosPagarSyncService {
 
   async *getDataStream() {
     const dataIterator =
-      this.oracleService.runCursorStream<TempTitulosPagarSyncRequestDto>(
+      this.oracleService.runCursorStream<InventoryBalanceSyncRequestInput>(
         this.query,
         {},
-        2000, // cada lote com até 2000 objetos
+        1000, // cada lote com até 2000 objetos
       );
     for await (const batch of dataIterator) {
-      yield batch.map((item) => new TempTitulosPagarSyncRequestDto(item));
+      yield batch.map((item) => new InventoryBalanceSyncRequestDto(item));
     }
   }
 
@@ -59,18 +62,19 @@ export class TempTitulosPagarSyncService {
 
     try {
       // limpa a tabela antes
-      await queryRunner.manager.delete(TempTitulosPagar, {});
+      await queryRunner.manager.delete(InventoryBalance, {});
 
       // processa lote a lote
       for await (const batch of this.getDataStream()) {
-        await queryRunner.manager.insert(TempTitulosPagar, batch);
+        // throw new Error('ERRO');
+        await queryRunner.manager.insert(InventoryBalance, batch);
       }
 
       await queryRunner.commitTransaction();
     } catch (error) {
       console.error({ error });
       await queryRunner.rollbackTransaction();
-      throw error;
+      throw new UnprocessableEntityException(error);
     } finally {
       await queryRunner.release();
     }

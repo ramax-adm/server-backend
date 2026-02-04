@@ -40,7 +40,7 @@ export class IncomingBatchesSyncRequestDto {
       productCode: data.CODIGO_PRODUTO,
       warehouseCode: data.CODIGO_ALMOXARIFADO,
       boxAmount: data.CAIXAS,
-      quantity: data.QUANTIDADE,
+      quantity: data.QUANTIDADE ?? 0,
       weightInKg: data.PESO,
     });
   }

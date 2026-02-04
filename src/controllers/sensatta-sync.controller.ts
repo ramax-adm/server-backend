@@ -8,6 +8,7 @@ import { ClientSyncService } from 'src/services/client-sync.service';
 import { CompanySyncService } from 'src/services/company-sync.service';
 import { FreightCompanySyncService } from 'src/services/freight-company-sync.service';
 import { IncomingBatchSyncService } from 'src/services/incoming-batch-sync.service';
+import { InventoryBalanceSyncService } from 'src/services/inventory-balance-sync.service';
 import { InventoryItemAndTraceabilitySyncService } from 'src/services/inventory-item-and-traceability-sync.service';
 import { InventorySyncService } from 'src/services/inventory-sync.service';
 import { InvoiceSyncService } from 'src/services/invoice-sync.service';
@@ -44,6 +45,7 @@ export class SensattaSyncController {
     private readonly returnOccurenceSyncService: ReturnOccurenceSyncService,
     private readonly sensattaEntitySyncService: SensattaEntitySyncService,
     private readonly inventorySyncService: InventorySyncService,
+    private readonly inventoryBalanceSyncService: InventoryBalanceSyncService,
     private readonly inventoryItemAndTraceabilitySyncService: InventoryItemAndTraceabilitySyncService,
     private readonly accountPayableSyncService: AccountPayableSyncService,
     private readonly accountReceivableSyncService: AccountReceivableSyncService,
@@ -58,17 +60,17 @@ export class SensattaSyncController {
     await this.productionMovementSyncService.processData();
     await this.syncInvoice();
     await this.syncStock();
-    await this.syncInventory();
     await this.syncStockBalance();
     await this.syncFreights();
     await this.syncPurchase();
     await this.syncFinance();
+    await this.syncInventory();
   }
 
   @Post('stock')
   @HttpCode(HttpStatus.CREATED)
   async syncStock() {
-    // await this.productionMovementSyncService.processData();
+    await this.productionMovementSyncService.processData();
     await this.incomingBatchSyncService.processData();
     await this.productSyncService.processData();
     await this.productLineSyncService.processData();
@@ -85,6 +87,7 @@ export class SensattaSyncController {
   @HttpCode(HttpStatus.CREATED)
   async syncInventory() {
     await this.inventorySyncService.processData();
+    await this.inventoryBalanceSyncService.processData();
     await this.inventoryItemAndTraceabilitySyncService.processData();
   }
 

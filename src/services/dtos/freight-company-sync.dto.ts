@@ -30,8 +30,8 @@ export class FreightCompanySyncRequestDto {
     Object.assign(this, {
       sensattaId: data.SEQUENCIAL_TRANSPORTADORA,
       sensattaCode: data.CODIGO_ENTIDADE,
-      name: data.NOME,
-      fantasyName: data.RAZAO_SOCIAL,
+      name: data.RAZAO_SOCIAL,
+      fantasyName: data.NOME,
       cnpj: data.CPF_CNPJ,
       stateSubscription: data.INSCRICAO_ESTADUAL,
       zipcode: data.CEP,

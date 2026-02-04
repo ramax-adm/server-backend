@@ -78,7 +78,8 @@ WITH
     LEFT JOIN rt
       ON rt.sequencial_titulo_receber = tr.sequencial_titulo_receber
     LEFT JOIN sigma_fin.INDICE i ON tr.CODIGO_INDICE = i.CODIGO_INDICE
-    LEFT JOIN sigma_mat.nota_saida ns ON ns.SEQUENCIAL_NOTA_SAIDA = tr.SEQUENCIAL_NOTA_SAIDA 
+    LEFT JOIN sigma_fin.RELACIONAMENTO_TITULO_RECEBER rtr on rtr.SEQUENCIAL_TITULO_RECEBER = tr.SEQUENCIAL_TITULO_RECEBER
+    LEFT JOIN sigma_mat.nota_saida ns ON ns.SEQUENCIAL_NOTA_SAIDA = rtr.SEQUENCIAL_NOTA_SAIDA 
     LEFT JOIN sigma_nfe.NOTA_FISCAL nf ON nf.SEQUENCIAL_NOTA = ns.SEQUENCIAL_NOTA_SAIDA AND nf.TIPO_DOCUMENTO = 1 -- fat saida 
     LEFT JOIN sigma_ger.EMPENHO e ON e.CODIGO_EMPENHO = tr.CODIGO_EMPENHO 
     LEFT JOIN sigma_fis.CONTA_CONTABIL cc ON cc.codigo_conta_contabil = e.CODIGO_CONTA_CONTABIL 

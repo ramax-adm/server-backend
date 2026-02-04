@@ -23,6 +23,12 @@ export class ProductionMovement {
   })
   movementType?: string;
 
+  @Column({ name: 'warehouse_code', nullable: true })
+  warehouseCode?: string;
+
+  @Column({ name: 'warehouse_name', nullable: true })
+  warehouseName?: string;
+
   @Column({
     name: 'operation_type',
     comment: 'especie de movimentação (reprocesso, padrao e etc)',

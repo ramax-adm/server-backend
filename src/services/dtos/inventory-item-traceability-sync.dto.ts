@@ -1,6 +1,7 @@
 export interface InventoryItemTraceabilitySyncRequestInput {
   ID_INVENTARIO: string;
   DATA_OPERACAO: Date;
+  ID_LOTE_ENTRADA: string;
   NUMERO_CAIXA: string;
   PESO: string;
   TARA_CAIXA: string;
@@ -16,6 +17,7 @@ export interface InventoryItemTraceabilitySyncRequestInput {
 export class InventoryItemTraceabilitySyncRequestDto {
   inventoryId?: string;
   date: Date;
+  incomingBatchId?: string;
   boxNumber?: string;
   weightInKg?: number;
   tareWeightInKg?: number;
@@ -32,6 +34,7 @@ export class InventoryItemTraceabilitySyncRequestDto {
     Object.assign(this, {
       inventoryId: data.ID_INVENTARIO,
       date: data.DATA_OPERACAO,
+      incomingBatchId: data.ID_LOTE_ENTRADA,
       boxNumber: data.NUMERO_CAIXA,
       weightInKg: data.PESO,
       tareWeightInKg: data.TARA_CAIXA,

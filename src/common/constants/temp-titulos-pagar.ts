@@ -33,8 +33,8 @@ SELECT
 FROM sigma_fin.titulo_pagar t
 JOIN sigma_mat.fornecedor f   ON f.codigo_fornecedor = t.codigo_fornecedor
 left join sigma_mat.nota_entrada  ne on t.sequencial_nota_entrada = ne.sequencial_nota_entrada
-WHERE f.codigo_fornecedor IN (5857,14556)
+WHERE f.codigo_fornecedor IN (5857,14556,15954)
 
-  AND t.data_emissao >= TO_DATE(:data1, 'YYYY-MM-DD')
-  AND t.data_emissao < TRUNC(SYSDATE) + 1
+  AND t.data_emissao >= TO_DATE('01/01/2025','DD/MM/YYYY')
+  AND t.data_emissao < TRUNC(SYSDATE)+1
 `;

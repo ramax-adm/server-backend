@@ -12,8 +12,11 @@ export interface OrderLineSyncRequestInput {
   CLIENTE: string;
   CODIGO_REPRESENTANTE: string;
   REPRESENTANTE: string;
+  CODIGO_PRAZO: string;
   PRAZO: string;
+  SEQUENCIAL_CATEGORIA_PEDIDO: string;
   CATEGORIA_PEDIDO: string;
+  OPERACAO: string;
   CODIGO_LINHA: string;
   LINHA: string;
   CODIGO_PRODUTO: string;
@@ -28,6 +31,7 @@ export interface OrderLineSyncRequestInput {
   VALOR_TOTAL: number;
   VALOR_TITULO: number;
   SEQUENCIAL_TABELA_PRECO: string;
+  NUMERO_TABELA: string;
   TABELA_PRECO: string;
   SEQUENCIAL_TRANSPORTADORA: string;
   TRANSPORTADORA: string;
@@ -43,6 +47,9 @@ export interface OrderLineSyncRequestInput {
   NOTA_FISCAL: string;
   CODIGO_CFOP: string;
   DESCRICAO_CFOP: string;
+  REGIAO_VENDA: string;
+  ID_ESPECIE_COBRANCA: string;
+  ESPECIE_COBRANCA: string;
 }
 export class OrderLineSyncRequestDto {
   billingDate?: Date;
@@ -56,8 +63,11 @@ export class OrderLineSyncRequestDto {
   clientName?: string;
   salesRepresentativeCode?: string;
   salesRepresentativeName?: string;
+  paymentTermCode?: string;
   paymentTerm?: string;
+  categoryCode?: string;
   category?: string;
+  orderOperation?: string;
   productLineCode?: string;
   productLineName?: string;
   productCode?: string;
@@ -72,6 +82,7 @@ export class OrderLineSyncRequestDto {
   totalValue?: number;
   receivableTitleValue?: number;
   referenceTableId?: string;
+  referenceTableNumber?: string;
   referenceTableDescription?: string;
   freightCompanyId?: string;
   freightCompanyName?: string;
@@ -87,6 +98,9 @@ export class OrderLineSyncRequestDto {
   nfNumber?: string;
   cfopCode?: string;
   cfopDescription?: string;
+  saleRegion?: string;
+  chargeSpecieCode?: string;
+  chargeSpecie?: string;
 
   constructor(data: OrderLineSyncRequestInput) {
     Object.assign(this, {
@@ -101,8 +115,11 @@ export class OrderLineSyncRequestDto {
       clientName: data.CLIENTE,
       salesRepresentativeCode: data.CODIGO_REPRESENTANTE,
       salesRepresentativeName: data.REPRESENTANTE,
+      paymentTermCode: data.CODIGO_PRAZO,
       paymentTerm: data.PRAZO,
+      categoryCode: data.SEQUENCIAL_CATEGORIA_PEDIDO,
       category: data.CATEGORIA_PEDIDO,
+      orderOperation: data.OPERACAO,
       productLineCode: data.CODIGO_LINHA,
       productLineName: data.LINHA,
       productCode: data.CODIGO_PRODUTO,
@@ -117,6 +134,7 @@ export class OrderLineSyncRequestDto {
       totalValue: data.VALOR_TOTAL,
       receivableTitleValue: data.VALOR_TITULO,
       referenceTableId: data.SEQUENCIAL_TABELA_PRECO,
+      referenceTableNumber: data.NUMERO_TABELA,
       referenceTableDescription: data.TABELA_PRECO,
       freightCompanyId: data.SEQUENCIAL_TRANSPORTADORA,
       freightCompanyName: data.TRANSPORTADORA,
@@ -132,6 +150,9 @@ export class OrderLineSyncRequestDto {
       nfNumber: data.NOTA_FISCAL,
       cfopCode: data.CODIGO_CFOP,
       cfopDescription: data.DESCRICAO_CFOP,
+      saleRegion: data.REGIAO_VENDA,
+      chargeSpecieCode: data.ID_ESPECIE_COBRANCA,
+      chargeSpecie: data.ESPECIE_COBRANCA,
     });
   }
 }

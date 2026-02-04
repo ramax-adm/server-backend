@@ -12,6 +12,7 @@ export interface CattlePurchaseSyncRequestInput {
   //PESO: string;
   TIPO_PESAGEM: string;
   ARROBA_CABECA: number;
+  KG_CABECA: number;
   PRAZO: number;
   VALOR_FRETE: number;
   VALOR_COMPRA: number;
@@ -34,6 +35,7 @@ export class CattlePurchaseSyncRequestDto {
   //weight: string;
   weighingType: string;
   cattleWeightInArroba: number;
+  cattleWeightInKg: number;
   balanceWeightInKg: number;
   paymentTerm: number;
   freightPrice: number;
@@ -58,6 +60,7 @@ export class CattlePurchaseSyncRequestDto {
       //weight: data.//PESO,
       weighingType: data.TIPO_PESAGEM,
       cattleWeightInArroba: data.ARROBA_CABECA,
+      cattleWeightInKg: data.KG_CABECA,
       balanceWeightInKg: data.PESAGEM_BALANCA,
       paymentTerm: data.PRAZO,
       freightPrice: data.VALOR_FRETE,

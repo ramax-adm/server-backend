@@ -1,5 +1,6 @@
 export interface InventoryItemSyncRequestInput {
   ID_INVENTARIO: string;
+  ID_LOTE_ENTRADA: string;
   NUMERO_CAIXA: string;
   DATA_PRODUCAO: Date;
   DATA_VALIDADE: Date;
@@ -13,6 +14,7 @@ export interface InventoryItemSyncRequestInput {
 }
 export class InventoryItemSyncRequestDto {
   inventoryId?: string;
+  incomingBatchId?: string;
   boxNumber?: string;
   productionDate?: string;
   dueDate?: Date;
@@ -27,6 +29,7 @@ export class InventoryItemSyncRequestDto {
   constructor(data: InventoryItemSyncRequestInput) {
     Object.assign(this, {
       inventoryId: data.ID_INVENTARIO,
+      incomingBatchId: data.ID_LOTE_ENTRADA,
       boxNumber: data.NUMERO_CAIXA,
       productionDate: data.DATA_PRODUCAO,
       dueDate: data.DATA_VALIDADE,

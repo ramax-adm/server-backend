@@ -38,6 +38,7 @@ import { TempTitulosPagarSyncService } from './services/temp-titulos-pagar-sync.
 import { AccountReceivableSyncService } from './services/account-receivable-sync.service';
 import { AccountPayableSyncService } from './services/account-payable-sync.service';
 import { TempHistoricoRefaturamentoSyncService } from './services/temp-historico-refaturamento-sync.service';
+import { InventoryBalanceSyncService } from './services/inventory-balance-sync.service';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { TempHistoricoRefaturamentoSyncService } from './services/temp-historico
     ReferencePriceSyncService,
     StockBalanceSyncService,
     InventorySyncService,
+    InventoryBalanceSyncService,
     InventoryItemAndTraceabilitySyncService,
     WarehouseSyncService,
     OrderLineSyncService,
